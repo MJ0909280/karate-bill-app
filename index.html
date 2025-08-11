@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lions Karate Club Pune - Bill Generator</title>
+    <title>Lions Karate Club - Bill Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -232,7 +232,7 @@
                         <i class="fas fa-lion text-white text-2xl"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold text-gray-800">Lions Karate Club Pune</h1>
+                        <h1 class="text-xl font-bold text-gray-800">Lions Karate Club</h1>
                         <p class="text-xs text-gray-600">Pune, Maharashtra</p>
                     </div>
                 </div>
@@ -286,9 +286,9 @@
                     <i class="fas fa-lion text-white text-3xl"></i>
                 </div>
             </div>
-            <h1 class="text-4xl font-bold text-gray-800 mb-2 animate-slide-in">Lions Karate Club Pune</h1>
+            <h1 class="text-4xl font-bold text-gray-800 mb-2 animate-slide-in">Lions Karate Club</h1>
             <p class="text-xl text-gray-600 font-medium">Pune, Maharashtra</p>
-            <p class="text-lg text-blue-600 font-medium">Registration.RCT.No: PU000121240</p>
+            <p class="text-lg text-blue-600 font-medium">Registration No: PU000121240</p>
             <p class="text-lg text-blue-600 mt-2 font-medium">Bill Generator System</p>
         </header>
         
@@ -724,15 +724,17 @@
             document.getElementById('mobileMenu').classList.remove('open');
         }
         
-        document.getElementById('monthlyTab').addEventListener('click', () => switchTab('monthly'));
-        document.getElementById('examTab').addEventListener('click', () => switchTab('exam'));
-        document.getElementById('otherTab').addEventListener('click', () => switchTab('other'));
-        document.getElementById('mobileMonthlyTab').addEventListener('click', () => switchTab('monthly'));
-        document.getElementById('mobileExamTab').addEventListener('click', () => switchTab('exam'));
-        document.getElementById('mobileOtherTab').addEventListener('click', () => switchTab('other'));
-        
-        // Set today's date as default
+        // Ensure DOM is fully loaded before attaching event listeners
         document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching event listeners
+            document.getElementById('monthlyTab').addEventListener('click', () => switchTab('monthly'));
+            document.getElementById('examTab').addEventListener('click', () => switchTab('exam'));
+            document.getElementById('otherTab').addEventListener('click', () => switchTab('other'));
+            document.getElementById('mobileMonthlyTab').addEventListener('click', () => switchTab('monthly'));
+            document.getElementById('mobileExamTab').addEventListener('click', () => switchTab('exam'));
+            document.getElementById('mobileOtherTab').addEventListener('click', () => switchTab('other'));
+            
+            // Set today's date as default
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('receiptDate').value = today;
             document.getElementById('examDate').value = today;
@@ -740,586 +742,139 @@
             
             // Load recent receipts from localStorage
             loadRecentReceipts();
-        });
-        
-        // Invoice number tracking using localStorage
-        function getNextInvoiceNumber(type) {
-            const now = new Date();
-            const year = now.getFullYear();
-            const key = `${type}_${year}`;
             
-            let lastNumber = localStorage.getItem(key);
-            if (!lastNumber) {
-                lastNumber = 0;
-            } else {
-                lastNumber = parseInt(lastNumber);
-            }
-            
-            const nextNumber = lastNumber + 1;
-            localStorage.setItem(key, nextNumber.toString());
-            
-            return nextNumber.toString().padStart(3, '0');
-        }
-        
-        // Save receipt to recent receipts
-        function saveRecentReceipt(type, studentName, amount, date) {
-            const receipts = JSON.parse(localStorage.getItem('recentReceipts') || '[]');
-            
-            // Limit to 5 recent receipts
-            if (receipts.length >= 5) {
-                receipts.pop();
-            }
-            
-            receipts.unshift({
-                type: type,
-                studentName: studentName,
-                amount: amount,
-                date: date,
-                timestamp: new Date().getTime()
+            // Add item functionality for other invoice
+            document.getElementById('addItem').addEventListener('click', function() {
+                const container = document.getElementById('itemsContainer');
+                const newItem = document.createElement('div');
+                newItem.className = 'item-row grid grid-cols-1 md:grid-cols-12 gap-4 items-end';
+                newItem.innerHTML = `
+                    
+
+                        
+                    
+
+                    
+
+                        
+                    
+
+                    
+
+                        
+                    
+
+                    
+
+                        
+                            
+                        
+                    
+
+                `;
+                container.appendChild(newItem);
+                
+                // Add event listener to the new remove button
+                newItem.querySelector('.remove-item').addEventListener('click', function() {
+                    if (container.children.length > 1) {
+                        container.removeChild(newItem);
+                    } else {
+                        showToast('At least one item is required', 'error');
+                    }
+                });
             });
             
-            localStorage.setItem('recentReceipts', JSON.stringify(receipts));
-            loadRecentReceipts();
-        }
-        
-        // Load recent receipts
-        function loadRecentReceipts() {
-            const receipts = JSON.parse(localStorage.getItem('recentReceipts') || '[]');
-            const container = document.getElementById('recentReceipts');
+            // Remove item functionality
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.remove-item')) {
+                    const container = document.getElementById('itemsContainer');
+                    const itemRow = e.target.closest('.item-row');
+                    if (container.children.length > 1) {
+                        container.removeChild(itemRow);
+                    } else {
+                        showToast('At least one item is required', 'error');
+                    }
+                }
+            });
             
-            if (receipts.length === 0) {
-                container.innerHTML = '
-
-No recent receipts yet
-
-';
-                return;
-            }
-            
-            let html = '';
-            receipts.forEach(receipt => {
-                const formattedDate = new Date(receipt.date).toLocaleDateString('en-IN', {
+            // Generate Monthly Receipt
+            document.getElementById('generateMonthlyReceipt').addEventListener('click', function() {
+                const studentName = document.getElementById('studentName').value;
+                const receiptDate = document.getElementById('receiptDate').value;
+                const monthlyFee = parseFloat(document.getElementById('monthlyFee').value) || 0;
+                const admissionFee = parseFloat(document.getElementById('admissionFee').value) || 0;
+                const otherCharges = parseFloat(document.getElementById('otherCharges').value) || 0;
+                const notes = document.getElementById('notes').value;
+                
+                if (!studentName || !receiptDate) {
+                    showToast('Please fill in all required fields', 'error');
+                    return;
+                }
+                
+                const totalAmount = monthlyFee + admissionFee + otherCharges;
+                const invoiceNumber = `INV-${new Date().getFullYear()}-${getNextInvoiceNumber('INV')}`;
+                
+                const formattedDate = new Date(receiptDate).toLocaleDateString('en-IN', {
                     day: '2-digit',
                     month: 'short',
                     year: 'numeric'
                 });
                 
-                let typeClass = 'bg-blue-100 text-blue-800';
-                let typeIcon = 'fa-calendar-alt';
-                
-                if (receipt.type === 'exam') {
-                    typeClass = 'bg-purple-100 text-purple-800';
-                    typeIcon = 'fa-medal';
-                } else if (receipt.type === 'other') {
-                    typeClass = 'bg-green-100 text-green-800';
-                    typeIcon = 'fa-file-invoice';
-                }
-                
-                html += `
+                const receiptHTML = `
                     
+Lions Karate Club Pune
 
-                        
+Phone: 9049688172 | Pune, Maharashtra
 
-                            
+Registration No: PU000121240
 
-                                
+Invoice No: ${invoiceNumber}</p> <p><span class="font-semibold">Date:</span> ${formattedDate}
 
-${receipt.studentName}</p>
-                                <p class="text-xs text-gray-500">${formattedDate}
+Student Name:
 
+${studentName}</p> </div> </div> <table class="w-full border-collapse mb-6"> <thead> <tr class="bg-gray-800 text-white"> <th class="text-left py-2 px-3">Description</th> <th class="text-right py-2 px-3">Amount (₹)</th> </tr> </thead> <tbody> ${monthlyFee > 0 ? ` Monthly Fee ₹${monthlyFee.toFixed(2)}</td> </tr> ` : ''} %%%LATEX_BLOCK_4%%%{admissionFee.toFixed(2)}</td> </tr> ` : ''} ${otherCharges > 0 ? ` Other Charges ₹${otherCharges.toFixed(2)}</td> </tr> ` : ''} <tr class="bg-gray-800"> <td class="font-bold text-white py-2 px-3">Total Amount</td> <td class="text-right font-bold text-white py-2 px-3">₹%%%LATEX_BLOCK_6%%%{notes ? ` <div class="mt-4 p-3 bg-blue-50 rounded text-xs"> <p class="font-semibold text-blue-800">Notes:</p> <p class="text-blue-700">${notes}
 
-                            
-
-                            
-                                <i class="fas ${typeIcon} mr-1"> ₹${receipt.amount.toFixed(2)}
-                            </span>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
-        }
-        
-        // Add item functionality for other invoice
-        document.getElementById('addItem').addEventListener('click', function() {
-            const container = document.getElementById('itemsContainer');
-            const newItem = document.createElement('div');
-            newItem.className = 'item-row grid grid-cols-1 md:grid-cols-12 gap-4 items-end';
-            newItem.innerHTML = `
-                <div class="md:col-span-5">
-                    <input type="text" class="item-description w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200 input-focus-effect" placeholder="Item description" required>
-                </div>
-                <div class="md:col-span-3">
-                    <input type="number" class="item-quantity w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200 input-focus-effect" value="1" min="1" required>
-                </div>
-                <div class="md:col-span-3">
-                    <input type="number" class="item-price w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200 input-focus-effect" value="0" min="0" step="0.01" required>
-                </div>
-                <div class="md:col-span-1">
-                    <button type="button" class="remove-item w-full h-10 flex items-center justify-center text-red-500 hover:text-red-700 rounded-lg hover:bg-red-50 transition duration-200">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            `;
-            container.appendChild(newItem);
-            
-            // Add event listener to the new remove button
-            newItem.querySelector('.remove-item').addEventListener('click', function() {
-                if (container.children.length > 1) {
-                    container.removeChild(newItem);
-                } else {
-                    showToast('At least one item is required', 'error');
-                }
-            });
-        });
-        
-        // Remove item functionality
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.remove-item')) {
-                const container = document.getElementById('itemsContainer');
-                const itemRow = e.target.closest('.item-row');
-                if (container.children.length > 1) {
-                    container.removeChild(itemRow);
-                } else {
-                    showToast('At least one item is required', 'error');
-                }
-            }
-        });
-        
-        // Generate Monthly Receipt
-        document.getElementById('generateMonthlyReceipt').addEventListener('click', function() {
-            const studentName = document.getElementById('studentName').value;
-            const receiptDate = document.getElementById('receiptDate').value;
-            const monthlyFee = parseFloat(document.getElementById('monthlyFee').value) || 0;
-            const admissionFee = parseFloat(document.getElementById('admissionFee').value) || 0;
-            const otherCharges = parseFloat(document.getElementById('otherCharges').value) || 0;
-            const notes = document.getElementById('notes').value;
-            
-            if (!studentName || !receiptDate) {
-                showToast('Please fill in all required fields', 'error');
-                return;
-            }
-            
-            const totalAmount = monthlyFee + admissionFee + otherCharges;
-            const invoiceNumber = `INV-${new Date().getFullYear()}-${getNextInvoiceNumber('INV')}`;
-            
-            const formattedDate = new Date(receiptDate).toLocaleDateString('en-IN', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric'
-            });
-            
-            const receiptHTML = `
-                <div class="pdf-receipt">
-                    <div class="text-center mb-6">
-                        <div class="flex justify-center mb-3">
-                            <img src="https://i.postimg.cc/FsCCfVFX/LIONS-l-OGO.png" alt="Club Logo" class="logo" style="width: 70px; height: 70px; object-fit: contain;">
-                        </div>
-                        <h1 class="text-xl font-bold">Lions Karate Club Pune</h1>
-                        <p class="text-xs text-gray-600">Phone: 9049688172 | Pune, Maharashtra</p>
-                        <p class="text-xs font-medium text-gray-600">Registration No: PU000121240</p>
-                    </div>
-                    
-                    <div class="flex justify-between mb-6 text-xs">
-                        <div>
-                            <p><span class="font-semibold">Invoice No:</span> ${invoiceNumber}
-
-
-                            
-
-Date: ${formattedDate}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="font-semibold">Student Name:</p>
-                            <p>${studentName}
-
-
-                        
-
-                    
-
-                    
-                    
-                            ${monthlyFee > 0 ? `<tr class="striped-row border-b border-gray-200"><td class="font-medium py-2 px-3">Monthly Fee</td><td class="text-right py-2 px-3">₹%%%LATEX_BLOCK_7%%%{admissionFee >0?`
-                            <tr class="striped-row border-b border-gray-200">
-                                <td class="font-medium py-2 px-3">Admission Fee</td>
-                                <td class="text-right py-2 px-3">₹${admissionFee.toFixed(2)}
-                            
-                            ` : ''}
-                            ${otherCharges > 0 ? `<tr class="striped-row border-b border-gray-200"><td class="font-medium py-2 px-3">Other Charges</td><td class="text-right py-2 px-3">₹%%%LATEX_BLOCK_9%%%{totalAmount.toFixed(2)}</td></tr></tbody></table>%%%LATEX_BLOCK_10%%%{notes}</p></div>` : ''}
-                    
-                    <div class="mt-6 pt-4 border-t border-gray-200 text-center">
-                        <div class="flex justify-center mb-3">
-                            <img src="https://i.postimg.cc/ht9xFK5Z/Whats-App-Image-2025-08-08-at-14-45-04-69c782b8.jpg" alt="QR Code" class="qr-code" style="width: 120px; height: 120px; object-fit: contain;">
-                        </div>
-                        <p class="text-xs text-gray-600">Scan QR code to pay</p>
-                        <p class="mt-3 text-xs text-gray-600">Thank you for your payment!</p>
-                        <p class="text-xs text-gray-600">Generated by Lions Karate Club Bill Generator</p>
-                        <p class="text-xs text-gray-500 mt-1">${new Date().toLocaleString()}
-
-
-                    
-                
-            `;
-            
-            document.getElementById('receiptPreview').innerHTML = receiptHTML;
-            document.getElementById('receiptPreviewSection').classList.remove('hidden');
-            
-            // Save to recent receipts
-            saveRecentReceipt('monthly', studentName, totalAmount, receiptDate);
-            
-            // Scroll to preview section
-            document.getElementById('receiptPreviewSection').scrollIntoView({ behavior: 'smooth' });
-            
-            showToast('Receipt generated successfully!');
-        });
-        
-        // Generate Exam Receipt
-        document.getElementById('generateExamReceipt').addEventListener('click', function() {
-            const studentName = document.getElementById('examStudentName').value;
-            const examDate = document.getElementById('examDate').value;
-            const appliedBelt = document.getElementById('appliedBelt').value;
-            const examFee = parseFloat(document.getElementById('examFee').value) || 0;
-            
-            if (!studentName || !examDate || !examFee) {
-                showToast('Please fill in all required fields', 'error');
-                return;
-            }
-            
-            const invoiceNumber = `EXAM-${new Date().getFullYear()}-${getNextInvoiceNumber('EXAM')}`;
-            
-            const formattedDate = new Date(examDate).toLocaleDateString('en-IN', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric'
-            });
-            
-            // Get belt color class
-            const beltColorClass = `belt-${appliedBelt.split(' ')[0].toLowerCase()}`;const receiptHTML =`
-                <div class="pdf-receipt">
-                    <div class="text-center mb-6">
-                        <div class="flex justify-center mb-3">
-                            <img src="https://i.postimg.cc/FsCCfVFX/LIONS-l-OGO.png" alt="Club Logo" class="logo" style="width: 70px; height: 70px; object-fit: contain;">
-                        </div>
-                        <h1 class="text-xl font-bold">Lions Karate Club Pune</h1>
-                        <p class="text-xs text-gray-600">Phone: 9049688172 | Pune, Maharashtra</p>
-                        <p class="text-xs font-medium text-gray-600">Registration No: PU000121240</p>
-                    </div>
-                    
-                    <div class="flex justify-between mb-6 text-xs">
-                        <div>
-                            <p><span class="font-semibold">Receipt No:</span> ${invoiceNumber}
-
-
-                            
-
-Date: ${formattedDate}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="font-semibold">Student Name:</p>
-                            <p>${studentName}
-
-
-                        
-                    
-                    
-                    
-Description	Amount (₹)
-Description	Amount (₹)
-${appliedBelt} Exam Fee</td>
-                                <td class="text-right py-2 px-3">₹${examFee.toFixed(2)}
-Total Amount	₹${examFee.toFixed(2)}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    
-                    <div class="mt-4 p-3 bg-purple-50 rounded text-xs">
-                        <p class="font-semibold text-purple-800">Exam Details:</p>
-                        <div class="flex items-center mt-1">
-                            <span class="px-2 py-1 rounded-full text-xs font-medium ${beltColorClass} mr-2">
-                                ${appliedBelt}
-                            </span>
-                            <p class="text-purple-700">Exam on ${formattedDate}
-
-
-                        
-                    
-                    
-                    
-
-                        
-
-                            
-
-                        
-
-                        
+` : ''}
 
 Scan QR code to pay
 
-
-                        
-
 Thank you for your payment!
-
-
-                        
 
 Generated by Lions Karate Club Bill Generator
 
+${new Date().toLocaleString()}</p> </div> </div> `; document.getElementById('receiptPreview').innerHTML = receiptHTML; document.getElementById('receiptPreviewSection').classList.remove('hidden'); // Save to recent receipts saveRecentReceipt('monthly', studentName, totalAmount, receiptDate); // Scroll to preview section document.getElementById('receiptPreviewSection').scrollIntoView({ behavior: 'smooth' }); showToast('Receipt generated successfully!'); }); // Generate Exam Receipt document.getElementById('generateExamReceipt').addEventListener('click', function() { const studentName = document.getElementById('examStudentName').value; const examDate = document.getElementById('examDate').value; const appliedBelt = document.getElementById('appliedBelt').value; const examFee = parseFloat(document.getElementById('examFee').value) || 0; if (!studentName || !examDate || !examFee) { showToast('Please fill in all required fields', 'error'); return; } const invoiceNumber = `EXAM-${new Date().getFullYear()}-${getNextInvoiceNumber('EXAM')}`; const formattedDate = new Date(examDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }); // Get belt color class const beltColorClass = `belt-${appliedBelt.split(' ')[0].toLowerCase()}`; const receiptHTML = `
 
-                        
+Lions Karate Club Pune
 
-${new Date().toLocaleString()}</p>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('receiptPreview').innerHTML = receiptHTML;
-            document.getElementById('receiptPreviewSection').classList.remove('hidden');
-            
-            // Save to recent receipts
-            saveRecentReceipt('exam', studentName, examFee, examDate);
-            
-            // Scroll to preview section
-            document.getElementById('receiptPreviewSection').scrollIntoView({ behavior: 'smooth' });
-            
-            showToast('Exam receipt generated successfully!');
-        });
-        
-        // Generate Other Invoice
-        document.getElementById('generateOtherReceipt').addEventListener('click', function() {
-            const studentName = document.getElementById('otherStudentName').value;
-            const receiptDate = document.getElementById('otherDate').value;
-            const notes = document.getElementById('otherNotes').value;
-            
-            if (!studentName || !receiptDate) {
-                showToast('Please fill in all required fields', 'error');
-                return;
-            }
-            
-            // Get all items
-            const itemRows = document.querySelectorAll('.item-row');
-            let items = [];
-            let totalAmount = 0;
-            
-            itemRows.forEach(row => {
-                const description = row.querySelector('.item-description').value;
-                const quantity = parseInt(row.querySelector('.item-quantity').value) || 0;
-                const price = parseFloat(row.querySelector('.item-price').value) || 0;
-                const amount = quantity * price;
-                
-                if (description && quantity > 0 && price > 0) {
-                    items.push({
-                        description,
-                        quantity,
-                        price,
-                        amount
-                    });
-                    totalAmount += amount;
-                }
-            });
-            
-            if (items.length === 0) {
-                showToast('Please add at least one valid item', 'error');
-                return;
-            }
-            
-            const invoiceNumber = `OTHER-${new Date().getFullYear()}-${getNextInvoiceNumber('OTHER')}`;
-            
-            const formattedDate = new Date(receiptDate).toLocaleDateString('en-IN', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric'
-            });
-            
-            let itemsHTML = '';
-            items.forEach(item => {
-                itemsHTML += `
-                <tr class="striped-row border-b border-gray-200">
-                    <td class="font-medium py-2 px-3">${item.description}
+Phone: 9049688172 | Pune, Maharashtra
 
-	${item.quantity}</td>
-                    <td class="text-right py-2 px-3">₹${item.price.toFixed(2)}	₹${item.amount.toFixed(2)}</td>
-                </tr>
-                `;
-            });
-            
-            const receiptHTML = `
-                <div class="pdf-receipt">
-                    <div class="text-center mb-6">
-                        <div class="flex justify-center mb-3">
-                            <img src="https://i.postimg.cc/FsCCfVFX/LIONS-l-OGO.png" alt="Club Logo" class="logo" style="width: 70px; height: 70px; object-fit: contain;">
-                        </div>
-                        <h1 class="text-xl font-bold">Lions Karate Club Pune</h1>
-                        <p class="text-xs text-gray-600">Phone: 9049688172 | Pune, Maharashtra</p>
-                        <p class="text-xs font-medium text-gray-600">Registration No: PU000121240</p>
-                    </div>
-                    
-                    <div class="flex justify-between mb-6 text-xs">
-                        <div>
-                            <p><span class="font-semibold">Invoice No:</span> ${invoiceNumber}
+Registration No: PU000121240
 
+Receipt No: ${invoiceNumber}</p> <p><span class="font-semibold">Date:</span> ${formattedDate}
 
-                            
+Student Name:
 
-Date: ${formattedDate}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="font-semibold">Student Name:</p>
-                            <p>${studentName}
+${studentName}</p> </div> </div> <table class="w-full border-collapse mb-6"> <thead> <tr class="bg-gray-800 text-white"> <th class="text-left py-2 px-3">Description</th> <th class="text-right py-2 px-3">Amount (₹)</th> </tr> </thead> <tbody> <tr class="striped-row border-b border-gray-200"> <td class="font-medium py-2 px-3">${appliedBelt} Exam Fee ₹${examFee.toFixed(2)}</td> </tr> <tr class="bg-gray-800"> <td class="font-bold text-white py-2 px-3">Total Amount</td> <td class="text-right font-bold text-white py-2 px-3">₹${examFee.toFixed(2)}
 
+Exam Details:
 
-                        
-                    
-                    
-                    
-                            ${itemsHTML}
-                            <tr class="bg-gray-800">
-                                <td colspan="3" class="font-bold text-white text-right py-2 px-3">Total Amount</td>
-                                <td class="text-right font-bold text-white py-2 px-3">₹${totalAmount.toFixed(2)}
-Description	Qty	Price (₹)	Amount (₹)
+${appliedBelt}
 
-                    
-                    ${notes ? `
-                    <div class="mt-4 p-3 bg-green-50 rounded text-xs">
-                        <p class="font-semibold text-green-800">Notes:</p>
-                        <p class="text-green-700">%%%LATEX_BLOCK_24%%%{new Date().toLocaleString()}</p>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('receiptPreview').innerHTML = receiptHTML;
-            document.getElementById('receiptPreviewSection').classList.remove('hidden');
-            
-            // Save to recent receipts
-            saveRecentReceipt('other', studentName, totalAmount, receiptDate);
-            
-            // Scroll to preview section
-            document.getElementById('receiptPreviewSection').scrollIntoView({ behavior: 'smooth' });
-            
-            showToast('Invoice generated successfully!');
-        });
-        
-        // Download PDF functionality - Optimized for single page with HD images
-        document.getElementById('downloadPdf').addEventListener('click', function() {
-            const button = this;
-            const originalText = button.innerHTML;
-            
-            // Show loading state
-            button.disabled = true;
-            button.innerHTML = '<div class="spinner mr-2"></div> Downloading...';
-            
-            const element = document.getElementById('receiptPreview');
-            
-            // Create a promise to handle the PDF generation
-            const generatePDF = new Promise((resolve, reject) => {
-                try {
-                    html2canvas(element, {
-                        scale: 2, // Higher scale for better quality
-                        logging: false,
-                        useCORS: true,
-                        scrollX: 0,
-                        scrollY: 0,
-                        windowWidth: element.scrollWidth,
-                        windowHeight: element.scrollHeight,
-                        backgroundColor: '#ffffff',
-                        allowTaint: true,
-                        foreignObjectRendering: true
-                    }).then(canvas => {
-                        const imgData = canvas.toDataURL('image/png');
-                        const pdf = new jsPDF('p', 'mm', 'a4');
-                        
-                        // Calculate dimensions to fit on one page
-                        const imgWidth = 210; // A4 width in mm
-                        const imgHeight = canvas.height * imgWidth / canvas.width;
-                        
-                        // Check if image height exceeds A4 page height
-                        if (imgHeight > 295) {
-                            // Scale down to fit on one page
-                            const scaleFactor = 295 / imgHeight;
-                            const newWidth = imgWidth * scaleFactor;
-                            const newHeight = imgHeight * scaleFactor;
-                            pdf.addImage(imgData, 'PNG', (210 - newWidth) / 2, 0, newWidth, newHeight);
-                        } else {
-                            // Center the image on the page
-                            const yPos = (295 - imgHeight) / 2;
-                            pdf.addImage(imgData, 'PNG', 0, yPos, imgWidth, imgHeight);
-                        }
-                        
-                        // Generate filename based on receipt type
-                        let filename = 'receipt.pdf';
-                        if (document.getElementById('monthlyForm').classList.contains('hidden') && 
-                            !document.getElementById('examForm').classList.contains('hidden')) {
-                            filename = `belt_exam_%%%LATEX_BLOCK_25%%%{document.getElementById('otherStudentName').value.replace(/\s+/g, '_')}.pdf`;
-                        } else {
-                            filename = `monthly_fee_${document.getElementById('studentName').value.replace(/\s+/g, '_')}.pdf`;
-                        }
-                        
-                        // For mobile devices, we need to use a different approach
-                        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                            // Create a blob and download it
-                            const pdfBlob = pdf.output('blob');
-                            const blobUrl = URL.createObjectURL(pdfBlob);
-                            
-                            // Create a temporary anchor element
-                            const a = document.createElement('a');
-                            a.href = blobUrl;
-                            a.download = filename;
-                            document.body.appendChild(a);
-                            a.click();
-                            
-                            // Clean up
-                            setTimeout(() => {
-                                document.body.removeChild(a);
-                                URL.revokeObjectURL(blobUrl);
-                            }, 100);
-                        } else {
-                            // For desktop, use the normal save method
-                            pdf.save(filename);
-                        }
-                        
-                        resolve();
-                    }).catch(err => {
-                        console.error('Error generating PDF:', err);
-                        reject('Error generating PDF');
-                    });
-                } catch (err) {
-                    console.error('Error in PDF generation:', err);
-                    reject('Error in PDF generation');
-                }
-            });
-            
-            generatePDF.then(() => {
-                showToast('PDF downloaded successfully!');
-            }).catch((error) => {
-                showToast(error || 'Failed to download PDF', 'error');
-            }).finally(() => {
-                // Restore button state
-                button.disabled = false;
-                button.innerHTML = originalText;
-            });
-        });
-        
-        // Print functionality
-        document.getElementById('printReceipt').addEventListener('click', function() {
-            const printWindow = window.open('', '', 'width=800,height=600');
-            printWindow.document.write('<html><head><title>Print Receipt</title>');
-            printWindow.document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">');
-            printWindow.document.write('<style>body { font-family: Arial; margin: 0; padding: 20px; }</style>');
-            printWindow.document.write('</head><body>');
-            printWindow.document.write(document.getElementById('receiptPreview').innerHTML);
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            
-            setTimeout(() => {
-                printWindow.print();
-                printWindow.close();
-            }, 500);
-            
-            showToast('Print dialog opened');
-        });
-    </script>
-</body>
-</html>
+Exam on ${formattedDate}</p> </div> </div> <div class="mt-6 pt-4 border-t border-gray-200 text-center"> <div class="flex justify-center mb-3"> <img src="https://i.postimg.cc/ht9xFK5Z/Whats-App-Image-2025-08-08-at-14-45-04-69c782b8.jpg" alt="QR Code" class="qr-code" style="width: 120px; height: 120px; object-fit: contain;"> </div> <p class="text-xs text-gray-600">Scan QR code to pay</p> <p class="mt-3 text-xs text-gray-600">Thank you for your payment!</p> <p class="text-xs text-gray-600">Generated by Lions Karate Club Bill Generator</p> <p class="text-xs text-gray-500 mt-1">${new Date().toLocaleString()}
+
+`; document.getElementById('receiptPreview').innerHTML = receiptHTML; document.getElementById('receiptPreviewSection').classList.remove('hidden'); // Save to recent receipts saveRecentReceipt('exam', studentName, examFee, examDate); // Scroll to preview section document.getElementById('receiptPreviewSection').scrollIntoView({ behavior: 'smooth' }); showToast('Exam receipt generated successfully!'); }); // Generate Other Invoice document.getElementById('generateOtherReceipt').addEventListener('click', function() { const studentName = document.getElementById('otherStudentName').value; const receiptDate = document.getElementById('otherDate').value; const notes = document.getElementById('otherNotes').value; if (!studentName || !receiptDate) { showToast('Please fill in all required fields', 'error'); return; } // Get all items const itemRows = document.querySelectorAll('.item-row'); let items = []; let totalAmount = 0; itemRows.forEach(row => { const description = row.querySelector('.item-description').value; const quantity = parseInt(row.querySelector('.item-quantity').value) || 0; const price = parseFloat(row.querySelector('.item-price').value) || 0; const amount = quantity * price; if (description && quantity > 0 && price > 0) { items.push({ description, quantity, price, amount }); totalAmount += amount; } }); if (items.length === 0) { showToast('Please add at least one valid item', 'error'); return; } const invoiceNumber = `OTHER-${new Date().getFullYear()}-${getNextInvoiceNumber('OTHER')}`; const formattedDate = new Date(receiptDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }); let itemsHTML = ''; items.forEach(item => { itemsHTML += ` ${item.description}</td> <td class="text-right py-2 px-3">${item.quantity} ₹${item.price.toFixed(2)}</td> <td class="text-right font-medium py-2 px-3">₹${item.amount.toFixed(2)} `; }); const receiptHTML = `
+Lions Karate Club Pune
+
+Phone: 9049688172 | Pune, Maharashtra
+
+Registration No: PU000121240
+
+Invoice No: ${invoiceNumber}</p> <p><span class="font-semibold">Date:</span> ${formattedDate}
+
+Student Name:
+
+${studentName}</p> </div> </div> <table class="w-full border-collapse mb-6"> <thead> <tr class="bg-gray-800 text-white"> <th class="text-left py-2 px-3">Description</th> <th class="text-right py-2 px-3">Qty</th> <th class="text-right py-2 px-3">Price (₹)</th> <th class="text-right py-2 px-3">Amount (₹)</th> </tr> </thead> <tbody> ${itemsHTML} Total Amount ₹${totalAmount.toFixed(2)}</td> </tr> </tbody> </table> ${notes ? `
+
+Notes:
+
+${notes}</p> </div> ` : ''} <div class="mt-6 pt-4 border-t border-gray-200 text-center"> <div class="flex justify-center mb-3"> <img src="https://i.postimg.cc/ht9xFK5Z/Whats-App-Image-2025-08-08-at-14-45-04-69c782b8.jpg" alt="QR Code" class="qr-code" style="width: 120px; height: 120px; object-fit: contain;"> </div> <p class="text-xs text-gray-600">Scan QR code to pay</p> <p class="mt-3 text-xs text-gray-600">Thank you for your payment!</p> <p class="text-xs text-gray-600">Generated by Lions Karate Club Bill Generator</p> <p class="text-xs text-gray-500 mt-1">%%%LATEX_BLOCK_21%%%{document.getElementById('examStudentName').value.replace(/\s+/g, '_')}.pdf`; } else if (document.getElementById('monthlyForm').classList.contains('hidden') && !document.getElementById('otherForm').classList.contains('hidden')) { filename = `other_invoice_%%%LATEX_BLOCK_22%%%{document.getElementById('studentName').value.replace(/\s+/g, '_')}.pdf`; } // For mobile devices, we need to use a different approach if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) { // Create a blob and download it const pdfBlob = pdf.output('blob'); const blobUrl = URL.createObjectURL(pdfBlob); // Create a temporary anchor element const a = document.createElement('a'); a.href = blobUrl; a.download = filename; document.body.appendChild(a); a.click(); // Clean up setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(blobUrl); }, 100); } else { // For desktop, use the normal save method pdf.save(filename); } resolve(); }).catch(err => { console.error('Error generating PDF:', err); reject('Error generating PDF'); }); } catch (err) { console.error('Error in PDF generation:', err); reject('Error in PDF generation'); } }); generatePDF.then(() => { showToast('PDF downloaded successfully!'); }).catch((error) => { showToast(error || 'Failed to download PDF', 'error'); }).finally(() => { // Restore button state button.disabled = false; button.innerHTML = originalText; }); }); // Print functionality document.getElementById('printReceipt').addEventListener('click', function() { const printWindow = window.open('', '', 'width=800,height=600'); printWindow.document.write('<html><head><title>Print Receipt</title>'); printWindow.document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">'); printWindow.document.write('<style>body { font-family: Arial; margin: 0; padding: 20px; }</style>'); printWindow.document.write('</head><body>'); printWindow.document.write(document.getElementById('receiptPreview').innerHTML); printWindow.document.write('</body></html>'); printWindow.document.close(); setTimeout(() => { printWindow.print(); printWindow.close(); }, 500); showToast('Print dialog opened'); }); }); // Invoice number tracking using localStorage function getNextInvoiceNumber(type) { const now = new Date(); const year = now.getFullYear(); const key = `%%%LATEX_BLOCK_23%%%{year}`; let lastNumber = localStorage.getItem(key); if (!lastNumber) { lastNumber = 0; } else { lastNumber = parseInt(lastNumber); } const nextNumber = lastNumber + 1; localStorage.setItem(key, nextNumber.toString()); return nextNumber.toString().padStart(3, '0'); } // Save receipt to recent receipts function saveRecentReceipt(type, studentName, amount, date) { const receipts = JSON.parse(localStorage.getItem('recentReceipts') || '[]'); // Limit to 5 recent receipts if (receipts.length >= 5) { receipts.pop(); } receipts.unshift({ type: type, studentName: studentName, amount: amount, date: date, timestamp: new Date().getTime() }); localStorage.setItem('recentReceipts', JSON.stringify(receipts)); loadRecentReceipts(); } // Load recent receipts function loadRecentReceipts() { const receipts = JSON.parse(localStorage.getItem('recentReceipts') || '[]'); const container = document.getElementById('recentReceipts'); if (receipts.length === 0) { container.innerHTML = '<p class="text-gray-500 italic">No recent receipts yet</p>'; return; } let html = ''; receipts.forEach(receipt => { const formattedDate = new Date(receipt.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }); let typeClass = 'bg-blue-100 text-blue-800'; let typeIcon = 'fa-calendar-alt'; if (receipt.type === 'exam') { typeClass = 'bg-purple-100 text-purple-800'; typeIcon = 'fa-medal'; } else if (receipt.type === 'other') { typeClass = 'bg-green-100 text-green-800'; typeIcon = 'fa-file-invoice'; } html += ` <div class="p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition duration-200"> <div class="flex justify-between items-start"> <div> <p class="font-medium">%%%LATEX_BLOCK_24%%%{formattedDate}</p> </div> <span class="px-2 py-1 rounded-full text-xs font-medium ${typeClass}"> ></i> ₹${receipt.amount.toFixed(2)} </span> </div> </div> `; }); container.innerHTML = html; } </script> </body> </html>
