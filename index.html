@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -555,7 +556,7 @@ The rest of the file remains unchanged.]
             const toastMessage = document.getElementById('toastMessage');
             
             toastMessage.textContent = message;
-            toast.className = toast ${type} show;
+            toast.className = `toast ${type} show`;
             
             setTimeout(() => {
                 toast.className = 'toast hidden';
@@ -632,7 +633,7 @@ The rest of the file remains unchanged.]
         function getNextInvoiceNumber(type) {
             const now = new Date();
             const year = now.getFullYear();
-            const key = ${type}_${year};
+            const key = `${type}_${year}`;
             
             let lastNumber = localStorage.getItem(key);
             if (!lastNumber) {
@@ -722,7 +723,7 @@ The rest of the file remains unchanged.]
             }
             
             const totalAmount = monthlyFee + admissionFee + otherCharges;
-            const invoiceNumber = INV-${new Date().getFullYear()}-${getNextInvoiceNumber('INV')};
+            const invoiceNumber = `INV-${new Date().getFullYear()}-${getNextInvoiceNumber('INV')}`;
             
             const formattedDate = new Date(receiptDate).toLocaleDateString('en-IN', {
                 day: '2-digit',
@@ -826,7 +827,7 @@ The rest of the file remains unchanged.]
                 return;
             }
             
-            const invoiceNumber = EXAM-${new Date().getFullYear()}-${getNextInvoiceNumber('EXAM')};
+            const invoiceNumber = `EXAM-${new Date().getFullYear()}-${getNextInvoiceNumber('EXAM')}`;
             
             const formattedDate = new Date(examDate).toLocaleDateString('en-IN', {
                 day: '2-digit',
@@ -835,7 +836,7 @@ The rest of the file remains unchanged.]
             });
             
             // Get belt color class
-            const beltColorClass = belt-${appliedBelt.split(' ')[0].toLowerCase()};
+            const beltColorClass = `belt-${appliedBelt.split(' ')[0].toLowerCase()}`;
             
             const receiptHTML = `
                 <div class="max-w-2xl mx-auto">
@@ -953,9 +954,9 @@ The rest of the file remains unchanged.]
                         // Generate filename based on receipt type
                         let filename = 'receipt.pdf';
                         if (document.getElementById('monthlyForm').classList.contains('hidden')) {
-                            filename = belt_exam_${document.getElementById('examStudentName').value.replace(/\s+/g, '_')}.pdf;
+                            filename = `belt_exam_${document.getElementById('examStudentName').value.replace(/\s+/g, '_')}.pdf`;
                         } else {
-                            filename = monthly_fee_${document.getElementById('studentName').value.replace(/\s+/g, '_')}.pdf;
+                            filename = `monthly_fee_${document.getElementById('studentName').value.replace(/\s+/g, '_')}.pdf`;
                         }
                         
                         // For mobile devices, we need to use a different approach
