@@ -186,33 +186,6 @@
         .mobile-menu.open {
             max-height: 500px;
         }
-        
-        /* PDF receipt styles */
-        .pdf-receipt {
-            font-family: 'Inter', sans-serif;
-            font-size: 12px;
-            line-height: 1.4;
-            max-width: 210mm;
-            padding: 10mm;
-        }
-        
-        .pdf-receipt table {
-            font-size: 11px;
-        }
-        
-        .pdf-receipt th, .pdf-receipt td {
-            padding: 4px 6px;
-        }
-        
-        .pdf-receipt .logo {
-            max-width: 60px;
-            max-height: 60px;
-        }
-        
-        .pdf-receipt .qr-code {
-            max-width: 100px;
-            max-height: 100px;
-        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -251,10 +224,6 @@
                         </button>
                         <button id="mobileExamTab" class="w-full py-2 px-4 rounded-lg bg-gray-100 text-gray-800 font-medium transition duration-200 flex items-center justify-between">
                             <span><i class="fas fa-medal mr-2"></i> Belt Exam Fee</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </button>
-                        <button id="mobileOtherTab" class="w-full py-2 px-4 rounded-lg bg-gray-100 text-gray-800 font-medium transition duration-200 flex items-center justify-between">
-                            <span><i class="fas fa-file-invoice mr-2"></i> Other Invoice</span>
                             <i class="fas fa-arrow-right"></i>
                         </button>
                     </div>
@@ -306,10 +275,6 @@
                         </button>
                         <button id="examTab" class="w-full py-3 px-4 rounded-lg bg-gray-100 text-gray-800 font-medium transition duration-200 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 flex items-center justify-between btn-hover-effect">
                             <span><i class="fas fa-medal mr-2"></i> Belt Exam Fee</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </button>
-                        <button id="otherTab" class="w-full py-3 px-4 rounded-lg bg-gray-100 text-gray-800 font-medium transition duration-200 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 flex items-center justify-between btn-hover-effect">
-                            <span><i class="fas fa-file-invoice mr-2"></i> Other Invoice</span>
                             <i class="fas fa-arrow-right"></i>
                         </button>
                     </div>
@@ -528,96 +493,6 @@
                     </form>
                 </div>
                 
-                <!-- Other Invoice Form -->
-                <div id="otherForm" class="bg-white rounded-xl shadow-sm p-6 mb-8 hidden animate-fade-in border border-gray-200">
-                    <div class="flex items-center mb-6">
-                        <div class="p-3 rounded-lg bg-green-100 text-green-600 mr-4">
-                            <i class="fas fa-file-invoice text-xl"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-gray-800">Other Invoice</h2>
-                            <p class="text-gray-600">Create custom invoices with multiple items</p>
-                        </div>
-                    </div>
-                    
-                    <form id="otherInvoiceForm" class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="otherStudentName" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                                    <i class="fas fa-user mr-2 text-green-500"></i> Student Name
-                                </label>
-                                <div class="relative">
-                                    <input type="text" id="otherStudentName" name="otherStudentName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200 input-focus-effect" placeholder="Enter student name" required>
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <i class="fas fa-user text-gray-400"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <label for="otherDate" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                                    <i class="fas fa-calendar-day mr-2 text-green-500"></i> Date
-                                </label>
-                                <div class="relative">
-                                    <input type="date" id="otherDate" name="otherDate" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200 input-focus-effect" required>
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <i class="fas fa-calendar text-gray-400"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Items Section -->
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <label class="block text-sm font-medium text-gray-700 flex items-center">
-                                    <i class="fas fa-list mr-2 text-green-500"></i> Items
-                                </label>
-                                <button type="button" id="addItem" class="px-3 py-1 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-200 flex items-center">
-                                    <i class="fas fa-plus mr-1"></i> Add Item
-                                </button>
-                            </div>
-                            
-                            <div id="itemsContainer" class="space-y-4">
-                                <div class="item-row grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                                    <div class="md:col-span-5">
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Description</label>
-                                        <input type="text" class="item-description w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200 input-focus-effect" placeholder="Item description" required>
-                                    </div>
-                                    <div class="md:col-span-3">
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
-                                        <input type="number" class="item-quantity w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200 input-focus-effect" value="1" min="1" required>
-                                    </div>
-                                    <div class="md:col-span-3">
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Price (₹)</label>
-                                        <input type="number" class="item-price w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200 input-focus-effect" value="0" min="0" step="0.01" required>
-                                    </div>
-                                    <div class="md:col-span-1">
-                                        <button type="button" class="remove-item w-full h-10 flex items-center justify-center text-red-500 hover:text-red-700 rounded-lg hover:bg-red-50 transition duration-200">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label for="otherNotes" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                                <i class="fas fa-sticky-note mr-2 text-green-500"></i> Notes
-                            </label>
-                            <textarea id="otherNotes" name="otherNotes" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200 input-focus-effect" placeholder="Additional notes (optional)"></textarea>
-                        </div>
-                        
-                        <div class="flex justify-end space-x-4 pt-2">
-                            <button type="reset" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 transition duration-200 flex items-center btn-hover-effect">
-                                <i class="fas fa-redo mr-2"></i> Reset
-                            </button>
-                            <button type="button" id="generateOtherReceipt" class="px-6 py-3 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-lg hover:from-green-700 hover:to-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-200 flex items-center btn-hover-effect">
-                                <i class="fas fa-file-invoice-dollar mr-2"></i> Generate Receipt
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                
                 <!-- Receipt Preview Section -->
                 <div id="receiptPreviewSection" class="bg-white rounded-xl shadow-sm p-6 hidden animate-fade-in border border-gray-200">
                     <div class="flex justify-between items-center mb-6">
@@ -648,6 +523,28 @@
         </div>
     </div>
 
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    // Create a blob with correct MIME type
+    const pdfBlob = pdf.output('blob');
+    const blob = new Blob([pdfBlob], { type: 'application/pdf' });
+    const blobUrl = URL.createObjectURL(blob);
+
+    // Create a temporary anchor element
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = filename.endsWith('.pdf') ? filename : filename + '.pdf'; // Ensure .pdf extension
+    document.body.appendChild(a);
+    a.click();
+
+    setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+    }, 100);
+} else {
+    pdf.save(filename.endsWith('.pdf') ? filename : filename + '.pdf');
+}
+
+The rest of the file remains unchanged.]
     <script>
         // Initialize jsPDF
         const { jsPDF } = window.jspdf;
@@ -658,7 +555,7 @@
             const toastMessage = document.getElementById('toastMessage');
             
             toastMessage.textContent = message;
-            toast.className = `toast ${type} show`;
+            toast.className = toast ${type} show;
             
             setTimeout(() => {
                 toast.className = 'toast hidden';
@@ -673,208 +570,471 @@
         
         // Tab switching functionality
         function switchTab(tab) {
-            // Hide all forms
-            document.getElementById('monthlyForm').classList.add('hidden');
-            document.getElementById('examForm').classList.add('hidden');
-            document.getElementById('otherForm').classList.add('hidden');
-            document.getElementById('receiptPreviewSection').classList.add('hidden');
-            
-            // Reset all tabs to inactive state
-            document.getElementById('monthlyTab').classList.remove('bg-gradient-to-r', 'from-blue-600', 'to-blue-500', 'text-white');
-            document.getElementById('monthlyTab').classList.add('bg-gray-100', 'text-gray-800');
-            
-            document.getElementById('examTab').classList.remove('bg-gradient-to-r', 'from-purple-600', 'to-purple-500', 'text-white');
-            document.getElementById('examTab').classList.add('bg-gray-100', 'text-gray-800');
-            
-            document.getElementById('otherTab').classList.remove('bg-gradient-to-r', 'from-green-600', 'to-green-500', 'text-white');
-            document.getElementById('otherTab').classList.add('bg-gray-100', 'text-gray-800');
-            
-            // Reset mobile tabs
-            document.getElementById('mobileMonthlyTab').classList.remove('bg-gradient-to-r', 'from-blue-600', 'to-blue-500', 'text-white');
-            document.getElementById('mobileMonthlyTab').classList.add('bg-gray-100', 'text-gray-800');
-            
-            document.getElementById('mobileExamTab').classList.remove('bg-gradient-to-r', 'from-purple-600', 'to-purple-500', 'text-white');
-            document.getElementById('mobileExamTab').classList.add('bg-gray-100', 'text-gray-800');
-            
-            document.getElementById('mobileOtherTab').classList.remove('bg-gradient-to-r', 'from-green-600', 'to-green-500', 'text-white');
-            document.getElementById('mobileOtherTab').classList.add('bg-gray-100', 'text-gray-800');
-            
-            // Show selected form and activate tab
             if (tab === 'monthly') {
                 document.getElementById('monthlyForm').classList.remove('hidden');
+                document.getElementById('examForm').classList.add('hidden');
+                document.getElementById('receiptPreviewSection').classList.add('hidden');
+                
                 document.getElementById('monthlyTab').classList.remove('bg-gray-100', 'text-gray-800');
                 document.getElementById('monthlyTab').classList.add('bg-gradient-to-r', 'from-blue-600', 'to-blue-500', 'text-white');
+                
+                document.getElementById('examTab').classList.remove('bg-gradient-to-r', 'from-purple-600', 'to-purple-500', 'text-white');
+                document.getElementById('examTab').classList.add('bg-gray-100', 'text-gray-800');
+                
+                // For mobile
                 document.getElementById('mobileMonthlyTab').classList.remove('bg-gray-100', 'text-gray-800');
                 document.getElementById('mobileMonthlyTab').classList.add('bg-gradient-to-r', 'from-blue-600', 'to-blue-500', 'text-white');
-            } else if (tab === 'exam') {
+                
+                document.getElementById('mobileExamTab').classList.remove('bg-gradient-to-r', 'from-purple-600', 'to-purple-500', 'text-white');
+                document.getElementById('mobileExamTab').classList.add('bg-gray-100', 'text-gray-800');
+                
+                // Close mobile menu
+                document.getElementById('mobileMenu').classList.remove('open');
+            } else {
+                document.getElementById('monthlyForm').classList.add('hidden');
                 document.getElementById('examForm').classList.remove('hidden');
+                document.getElementById('receiptPreviewSection').classList.add('hidden');
+                
                 document.getElementById('examTab').classList.remove('bg-gray-100', 'text-gray-800');
                 document.getElementById('examTab').classList.add('bg-gradient-to-r', 'from-purple-600', 'to-purple-500', 'text-white');
+                
+                document.getElementById('monthlyTab').classList.remove('bg-gradient-to-r', 'from-blue-600', 'to-blue-500', 'text-white');
+                document.getElementById('monthlyTab').classList.add('bg-gray-100', 'text-gray-800');
+                
+                // For mobile
                 document.getElementById('mobileExamTab').classList.remove('bg-gray-100', 'text-gray-800');
                 document.getElementById('mobileExamTab').classList.add('bg-gradient-to-r', 'from-purple-600', 'to-purple-500', 'text-white');
-            } else if (tab === 'other') {
-                document.getElementById('otherForm').classList.remove('hidden');
-                document.getElementById('otherTab').classList.remove('bg-gray-100', 'text-gray-800');
-                document.getElementById('otherTab').classList.add('bg-gradient-to-r', 'from-green-600', 'to-green-500', 'text-white');
-                document.getElementById('mobileOtherTab').classList.remove('bg-gray-100', 'text-gray-800');
-                document.getElementById('mobileOtherTab').classList.add('bg-gradient-to-r', 'from-green-600', 'to-green-500', 'text-white');
+                
+                document.getElementById('mobileMonthlyTab').classList.remove('bg-gradient-to-r', 'from-blue-600', 'to-blue-500', 'text-white');
+                document.getElementById('mobileMonthlyTab').classList.add('bg-gray-100', 'text-gray-800');
+                
+                // Close mobile menu
+                document.getElementById('mobileMenu').classList.remove('open');
             }
-            
-            // Close mobile menu
-            document.getElementById('mobileMenu').classList.remove('open');
         }
         
-        // Ensure DOM is fully loaded before attaching event listeners
+        document.getElementById('monthlyTab').addEventListener('click', () => switchTab('monthly'));
+        document.getElementById('examTab').addEventListener('click', () => switchTab('exam'));
+        document.getElementById('mobileMonthlyTab').addEventListener('click', () => switchTab('monthly'));
+        document.getElementById('mobileExamTab').addEventListener('click', () => switchTab('exam'));
+        
+        // Set today's date as default
         document.addEventListener('DOMContentLoaded', function() {
-            // Tab switching event listeners
-            document.getElementById('monthlyTab').addEventListener('click', () => switchTab('monthly'));
-            document.getElementById('examTab').addEventListener('click', () => switchTab('exam'));
-            document.getElementById('otherTab').addEventListener('click', () => switchTab('other'));
-            document.getElementById('mobileMonthlyTab').addEventListener('click', () => switchTab('monthly'));
-            document.getElementById('mobileExamTab').addEventListener('click', () => switchTab('exam'));
-            document.getElementById('mobileOtherTab').addEventListener('click', () => switchTab('other'));
-            
-            // Set today's date as default
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('receiptDate').value = today;
             document.getElementById('examDate').value = today;
-            document.getElementById('otherDate').value = today;
             
             // Load recent receipts from localStorage
             loadRecentReceipts();
+        });
+        
+        // Invoice number tracking using localStorage
+        function getNextInvoiceNumber(type) {
+            const now = new Date();
+            const year = now.getFullYear();
+            const key = ${type}_${year};
             
-            // Add item functionality for other invoice
-            document.getElementById('addItem').addEventListener('click', function() {
-                const container = document.getElementById('itemsContainer');
-                const newItem = document.createElement('div');
-                newItem.className = 'item-row grid grid-cols-1 md:grid-cols-12 gap-4 items-end';
-                newItem.innerHTML = `
-                    
-
-                        
-                    
-
-                    
-
-                        
-                    
-
-                    
-
-                        
-                    
-
-                    
-
-                        
-                            
-                        
-                    
-
-                `;
-                container.appendChild(newItem);
-                
-                // Add event listener to the new remove button
-                newItem.querySelector('.remove-item').addEventListener('click', function() {
-                    if (container.children.length > 1) {
-                        container.removeChild(newItem);
-                    } else {
-                        showToast('At least one item is required', 'error');
-                    }
-                });
+            let lastNumber = localStorage.getItem(key);
+            if (!lastNumber) {
+                lastNumber = 0;
+            } else {
+                lastNumber = parseInt(lastNumber);
+            }
+            
+            const nextNumber = lastNumber + 1;
+            localStorage.setItem(key, nextNumber.toString());
+            
+            return nextNumber.toString().padStart(3, '0');
+        }
+        
+        // Save receipt to recent receipts
+        function saveRecentReceipt(type, studentName, amount, date) {
+            const receipts = JSON.parse(localStorage.getItem('recentReceipts') || '[]');
+            
+            // Limit to 5 recent receipts
+            if (receipts.length >= 5) {
+                receipts.pop();
+            }
+            
+            receipts.unshift({
+                type: type,
+                studentName: studentName,
+                amount: amount,
+                date: date,
+                timestamp: new Date().getTime()
             });
             
-            // Remove item functionality
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('.remove-item')) {
-                    const container = document.getElementById('itemsContainer');
-                    const itemRow = e.target.closest('.item-row');
-                    if (container.children.length > 1) {
-                        container.removeChild(itemRow);
-                    } else {
-                        showToast('At least one item is required', 'error');
-                    }
-                }
-            });
+            localStorage.setItem('recentReceipts', JSON.stringify(receipts));
+            loadRecentReceipts();
+        }
+        
+        // Load recent receipts
+        function loadRecentReceipts() {
+            const receipts = JSON.parse(localStorage.getItem('recentReceipts') || '[]');
+            const container = document.getElementById('recentReceipts');
             
-            // Generate Monthly Receipt
-            document.getElementById('generateMonthlyReceipt').addEventListener('click', function() {
-                const studentName = document.getElementById('studentName').value;
-                const receiptDate = document.getElementById('receiptDate').value;
-                const monthlyFee = parseFloat(document.getElementById('monthlyFee').value) || 0;
-                const admissionFee = parseFloat(document.getElementById('admissionFee').value) || 0;
-                const otherCharges = parseFloat(document.getElementById('otherCharges').value) || 0;
-                const notes = document.getElementById('notes').value;
-                
-                if (!studentName || !receiptDate) {
-                    showToast('Please fill in all required fields', 'error');
-                    return;
-                }
-                
-                const totalAmount = monthlyFee + admissionFee + otherCharges;
-                const invoiceNumber = `INV-${new Date().getFullYear()}-${getNextInvoiceNumber('INV')}`;
-                
-                const formattedDate = new Date(receiptDate).toLocaleDateString('en-IN', {
+            if (receipts.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 italic">No recent receipts yet</p>';
+                return;
+            }
+            
+            let html = '';
+            receipts.forEach(receipt => {
+                const formattedDate = new Date(receipt.date).toLocaleDateString('en-IN', {
                     day: '2-digit',
                     month: 'short',
                     year: 'numeric'
                 });
                 
-                const receiptHTML = `
+                const typeClass = receipt.type === 'monthly' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800';
+                const typeIcon = receipt.type === 'monthly' ? 'fa-calendar-alt' : 'fa-medal';
+                
+                html += `
+                    <div class="p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition duration-200">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-medium">${receipt.studentName}</p>
+                                <p class="text-xs text-gray-500">${formattedDate}</p>
+                            </div>
+                            <span class="px-2 py-1 rounded-full text-xs font-medium ${typeClass}">
+                                <i class="fas ${typeIcon} mr-1"></i> ₹${receipt.amount.toFixed(2)}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // Generate Monthly Receipt
+        document.getElementById('generateMonthlyReceipt').addEventListener('click', function() {
+            const studentName = document.getElementById('studentName').value;
+            const receiptDate = document.getElementById('receiptDate').value;
+            const monthlyFee = parseFloat(document.getElementById('monthlyFee').value) || 0;
+            const admissionFee = parseFloat(document.getElementById('admissionFee').value) || 0;
+            const otherCharges = parseFloat(document.getElementById('otherCharges').value) || 0;
+            const notes = document.getElementById('notes').value;
+            
+            if (!studentName || !receiptDate) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            const totalAmount = monthlyFee + admissionFee + otherCharges;
+            const invoiceNumber = INV-${new Date().getFullYear()}-${getNextInvoiceNumber('INV')};
+            
+            const formattedDate = new Date(receiptDate).toLocaleDateString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+            
+            const receiptHTML = `
+                <div class="max-w-2xl mx-auto">
+                    <div class="text-center mb-8">
+                        <p class="text-sm font-medium text-gray-600 mb-2">Registration No: PU000121240</p>
+                        <div class="flex justify-center mb-4">
+                            <div class="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center shadow-lg">
+                                <i class="fas fa-lion text-white text-3xl"></i>
+                            </div>
+                        </div>
+                        <h1 class="text-3xl font-bold">Lions Karate Club Pune</h1>
+                        <p class="text-sm text-gray-600 mt-1">Phone: 9049688172 | Pune, Maharashtra</p>
+                    </div>
                     
-Lions Karate Club Pune
-
-Phone: 9049688172 | Pune, Maharashtra
-
-Registration No: PU000121240
-
-Invoice No: ${invoiceNumber}</p> <p><span class="font-semibold">Date:</span> ${formattedDate}
-
-Student Name:
-
-${studentName}</p> </div> </div> <table class="w-full border-collapse mb-6"> <thead> <tr class="bg-gray-800 text-white"> <th class="text-left py-2 px-3">Description</th> <th class="text-right py-2 px-3">Amount (₹)</th> </tr> </thead> <tbody> ${monthlyFee > 0 ? ` Monthly Fee ₹${monthlyFee.toFixed(2)}</td> </tr> ` : ''} %%%LATEX_BLOCK_4%%%{admissionFee.toFixed(2)}</td> </tr> ` : ''} ${otherCharges > 0 ? ` Other Charges ₹${otherCharges.toFixed(2)}</td> </tr> ` : ''} <tr class="bg-gray-800"> <td class="font-bold text-white py-2 px-3">Total Amount</td> <td class="text-right font-bold text-white py-2 px-3">₹%%%LATEX_BLOCK_6%%%{notes ? ` <div class="mt-4 p-3 bg-blue-50 rounded text-xs"> <p class="font-semibold text-blue-800">Notes:</p> <p class="text-blue-700">${notes}
-
-` : ''}
-
-Scan QR code to pay
-
-Thank you for your payment!
-
-Generated by Lions Karate Club Bill Generator
-
-${new Date().toLocaleString()}</p> </div> </div> `; document.getElementById('receiptPreview').innerHTML = receiptHTML; document.getElementById('receiptPreviewSection').classList.remove('hidden'); // Save to recent receipts saveRecentReceipt('monthly', studentName, totalAmount, receiptDate); // Scroll to preview section document.getElementById('receiptPreviewSection').scrollIntoView({ behavior: 'smooth' }); showToast('Receipt generated successfully!'); }); // Generate Exam Receipt document.getElementById('generateExamReceipt').addEventListener('click', function() { const studentName = document.getElementById('examStudentName').value; const examDate = document.getElementById('examDate').value; const appliedBelt = document.getElementById('appliedBelt').value; const examFee = parseFloat(document.getElementById('examFee').value) || 0; if (!studentName || !examDate || !examFee) { showToast('Please fill in all required fields', 'error'); return; } const invoiceNumber = `EXAM-${new Date().getFullYear()}-${getNextInvoiceNumber('EXAM')}`; const formattedDate = new Date(examDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }); // Get belt color class const beltColorClass = `belt-${appliedBelt.split(' ')[0].toLowerCase()}`; const receiptHTML = `
-
-Lions Karate Club Pune
-
-Phone: 9049688172 | Pune, Maharashtra
-
-Registration No: PU000121240
-
-Receipt No: ${invoiceNumber}</p> <p><span class="font-semibold">Date:</span> ${formattedDate}
-
-Student Name:
-
-${studentName}</p> </div> </div> <table class="w-full border-collapse mb-6"> <thead> <tr class="bg-gray-800 text-white"> <th class="text-left py-2 px-3">Description</th> <th class="text-right py-2 px-3">Amount (₹)</th> </tr> </thead> <tbody> <tr class="striped-row border-b border-gray-200"> <td class="font-medium py-2 px-3">${appliedBelt} Exam Fee ₹${examFee.toFixed(2)}</td> </tr> <tr class="bg-gray-800"> <td class="font-bold text-white py-2 px-3">Total Amount</td> <td class="text-right font-bold text-white py-2 px-3">₹${examFee.toFixed(2)}
-
-Exam Details:
-
-${appliedBelt}
-
-Exam on ${formattedDate}</p> </div> </div> <div class="mt-6 pt-4 border-t border-gray-200 text-center"> <div class="flex justify-center mb-3"> <img src="https://i.postimg.cc/ht9xFK5Z/Whats-App-Image-2025-08-08-at-14-45-04-69c782b8.jpg" alt="QR Code" class="qr-code" style="width: 120px; height: 120px; object-fit: contain;"> </div> <p class="text-xs text-gray-600">Scan QR code to pay</p> <p class="mt-3 text-xs text-gray-600">Thank you for your payment!</p> <p class="text-xs text-gray-600">Generated by Lions Karate Club Bill Generator</p> <p class="text-xs text-gray-500 mt-1">${new Date().toLocaleString()}
-
-`; document.getElementById('receiptPreview').innerHTML = receiptHTML; document.getElementById('receiptPreviewSection').classList.remove('hidden'); // Save to recent receipts saveRecentReceipt('exam', studentName, examFee, examDate); // Scroll to preview section document.getElementById('receiptPreviewSection').scrollIntoView({ behavior: 'smooth' }); showToast('Exam receipt generated successfully!'); }); // Generate Other Invoice document.getElementById('generateOtherReceipt').addEventListener('click', function() { const studentName = document.getElementById('otherStudentName').value; const receiptDate = document.getElementById('otherDate').value; const notes = document.getElementById('otherNotes').value; if (!studentName || !receiptDate) { showToast('Please fill in all required fields', 'error'); return; } // Get all items const itemRows = document.querySelectorAll('.item-row'); let items = []; let totalAmount = 0; itemRows.forEach(row => { const description = row.querySelector('.item-description').value; const quantity = parseInt(row.querySelector('.item-quantity').value) || 0; const price = parseFloat(row.querySelector('.item-price').value) || 0; const amount = quantity * price; if (description && quantity > 0 && price > 0) { items.push({ description, quantity, price, amount }); totalAmount += amount; } }); if (items.length === 0) { showToast('Please add at least one valid item', 'error'); return; } const invoiceNumber = `OTHER-${new Date().getFullYear()}-${getNextInvoiceNumber('OTHER')}`; const formattedDate = new Date(receiptDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }); let itemsHTML = ''; items.forEach(item => { itemsHTML += ` ${item.description}</td> <td class="text-right py-2 px-3">${item.quantity} ₹${item.price.toFixed(2)}</td> <td class="text-right font-medium py-2 px-3">₹${item.amount.toFixed(2)} `; }); const receiptHTML = `
-Lions Karate Club Pune
-
-Phone: 9049688172 | Pune, Maharashtra
-
-Registration No: PU000121240
-
-Invoice No: ${invoiceNumber}</p> <p><span class="font-semibold">Date:</span> ${formattedDate}
-
-Student Name:
-
-${studentName}</p> </div> </div> <table class="w-full border-collapse mb-6"> <thead> <tr class="bg-gray-800 text-white"> <th class="text-left py-2 px-3">Description</th> <th class="text-right py-2 px-3">Qty</th> <th class="text-right py-2 px-3">Price (₹)</th> <th class="text-right py-2 px-3">Amount (₹)</th> </tr> </thead> <tbody> ${itemsHTML} Total Amount ₹${totalAmount.toFixed(2)}</td> </tr> </tbody> </table> ${notes ? `
-
-Notes:
-
-${notes}</p> </div> ` : ''} <div class="mt-6 pt-4 border-t border-gray-200 text-center"> <div class="flex justify-center mb-3"> <img src="https://i.postimg.cc/ht9xFK5Z/Whats-App-Image-2025-08-08-at-14-45-04-69c782b8.jpg" alt="QR Code" class="qr-code" style="width: 120px; height: 120px; object-fit: contain;"> </div> <p class="text-xs text-gray-600">Scan QR code to pay</p> <p class="mt-3 text-xs text-gray-600">Thank you for your payment!</p> <p class="text-xs text-gray-600">Generated by Lions Karate Club Bill Generator</p> <p class="text-xs text-gray-500 mt-1">%%%LATEX_BLOCK_21%%%{document.getElementById('examStudentName').value.replace(/\s+/g, '_')}.pdf`; } else if (document.getElementById('monthlyForm').classList.contains('hidden') && !document.getElementById('otherForm').classList.contains('hidden')) { filename = `other_invoice_%%%LATEX_BLOCK_22%%%{document.getElementById('studentName').value.replace(/\s+/g, '_')}.pdf`; } // For mobile devices, we need to use a different approach if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) { // Create a blob and download it const pdfBlob = pdf.output('blob'); const blobUrl = URL.createObjectURL(pdfBlob); // Create a temporary anchor element const a = document.createElement('a'); a.href = blobUrl; a.download = filename; document.body.appendChild(a); a.click(); // Clean up setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(blobUrl); }, 100); } else { // For desktop, use the normal save method pdf.save(filename); } resolve(); }).catch(err => { console.error('Error generating PDF:', err); reject('Error generating PDF'); }); } catch (err) { console.error('Error in PDF generation:', err); reject('Error in PDF generation'); } }); generatePDF.then(() => { showToast('PDF downloaded successfully!'); }).catch((error) => { showToast(error || 'Failed to download PDF', 'error'); }).finally(() => { // Restore button state button.disabled = false; button.innerHTML = originalText; }); }); // Print functionality document.getElementById('printReceipt').addEventListener('click', function() { const printWindow = window.open('', '', 'width=800,height=600'); printWindow.document.write('<html><head><title>Print Receipt</title>'); printWindow.document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">'); printWindow.document.write('<style>body { font-family: Arial; margin: 0; padding: 20px; }</style>'); printWindow.document.write('</head><body>'); printWindow.document.write(document.getElementById('receiptPreview').innerHTML); printWindow.document.write('</body></html>'); printWindow.document.close(); setTimeout(() => { printWindow.print(); printWindow.close(); }, 500); showToast('Print dialog opened'); }); }); // Invoice number tracking using localStorage function getNextInvoiceNumber(type) { const now = new Date(); const year = now.getFullYear(); const key = `%%%LATEX_BLOCK_23%%%{year}`; let lastNumber = localStorage.getItem(key); if (!lastNumber) { lastNumber = 0; } else { lastNumber = parseInt(lastNumber); } const nextNumber = lastNumber + 1; localStorage.setItem(key, nextNumber.toString()); return nextNumber.toString().padStart(3, '0'); } // Save receipt to recent receipts function saveRecentReceipt(type, studentName, amount, date) { const receipts = JSON.parse(localStorage.getItem('recentReceipts') || '[]'); // Limit to 5 recent receipts if (receipts.length >= 5) { receipts.pop(); } receipts.unshift({ type: type, studentName: studentName, amount: amount, date: date, timestamp: new Date().getTime() }); localStorage.setItem('recentReceipts', JSON.stringify(receipts)); loadRecentReceipts(); } // Load recent receipts function loadRecentReceipts() { const receipts = JSON.parse(localStorage.getItem('recentReceipts') || '[]'); const container = document.getElementById('recentReceipts'); if (receipts.length === 0) { container.innerHTML = '<p class="text-gray-500 italic">No recent receipts yet</p>'; return; } let html = ''; receipts.forEach(receipt => { const formattedDate = new Date(receipt.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }); let typeClass = 'bg-blue-100 text-blue-800'; let typeIcon = 'fa-calendar-alt'; if (receipt.type === 'exam') { typeClass = 'bg-purple-100 text-purple-800'; typeIcon = 'fa-medal'; } else if (receipt.type === 'other') { typeClass = 'bg-green-100 text-green-800'; typeIcon = 'fa-file-invoice'; } html += ` <div class="p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition duration-200"> <div class="flex justify-between items-start"> <div> <p class="font-medium">%%%LATEX_BLOCK_24%%%{formattedDate}</p> </div> <span class="px-2 py-1 rounded-full text-xs font-medium ${typeClass}"> ></i> ₹${receipt.amount.toFixed(2)} </span> </div> </div> `; }); container.innerHTML = html; } </script> </body> </html>
+                    <div class="flex justify-between mb-8">
+                        <div>
+                            <p class="text-sm"><span class="font-semibold">Invoice No:</span> ${invoiceNumber}</p>
+                            <p class="text-sm"><span class="font-semibold">Date:</span> ${formattedDate}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-semibold">Student Name:</p>
+                            <p class="text-sm">${studentName}</p>
+                        </div>
+                    </div>
+                    
+                    <table class="w-full border-collapse mb-8">
+                        <thead>
+                            <tr class="bg-gray-700 text-gray-100">
+                                <th class="py-3 px-4 text-left">Description</th>
+                                <th class="py-3 px-4 text-right">Amount (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${monthlyFee > 0 ? `
+                            <tr class="striped-row border-b border-gray-700">
+                                <td class="py-3 px-4 font-bold text-gray-900">Monthly Fee</td>
+                                <td class="py-3 px-4 text-right font-bold text-gray-900">${monthlyFee.toFixed(2)}</td>
+                            </tr>
+                            ` : ''}
+                            ${admissionFee > 0 ? `
+                            <tr class="striped-row border-b border-gray-200">
+                                <td class="py-3 px-4 font-bold text-gray-900">Admission Fee</td>
+                                <td class="py-3 px-4 text-right font-bold text-gray-900">${admissionFee.toFixed(2)}</td>
+                            </tr>
+                            ` : ''}
+                            ${otherCharges > 0 ? `
+                            <tr class="striped-row border-b border-gray-200">
+                                <td class="py-3 px-4 font-bold text-gray-900">Other Charges</td>
+                                <td class="py-3 px-4 text-right font-bold text-gray-900">${otherCharges.toFixed(2)}</td>
+                            </tr>
+                            ` : ''}
+                            <tr class="bg-gray-800">
+                                <td class="py-3 px-4 font-bold text-white">Total Amount</td>
+                                <td class="py-3 px-4 text-right font-bold text-white">₹${totalAmount.toFixed(2)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    ${notes ? `
+                    <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                        <p class="text-sm font-semibold text-blue-800">Notes:</p>
+                        <p class="text-sm text-blue-700">${notes}</p>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="mt-12 pt-6 border-t border-gray-200 text-center text-sm text-gray-600">
+                        <p>Thank you for your payment!</p>
+                        <p class="mt-2">Generated by Lions Karate Club Bill Generator</p>
+                        <p class="mt-1 text-xs">${new Date().toLocaleString()}</p>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('receiptPreview').innerHTML = receiptHTML;
+            document.getElementById('receiptPreviewSection').classList.remove('hidden');
+            
+            // Save to recent receipts
+            saveRecentReceipt('monthly', studentName, totalAmount, receiptDate);
+            
+            // Scroll to preview section
+            document.getElementById('receiptPreviewSection').scrollIntoView({ behavior: 'smooth' });
+            
+            showToast('Receipt generated successfully!');
+        });
+        
+        // Generate Exam Receipt
+        document.getElementById('generateExamReceipt').addEventListener('click', function() {
+            const studentName = document.getElementById('examStudentName').value;
+            const examDate = document.getElementById('examDate').value;
+            const appliedBelt = document.getElementById('appliedBelt').value;
+            const examFee = parseFloat(document.getElementById('examFee').value) || 0;
+            
+            if (!studentName || !examDate || !examFee) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            const invoiceNumber = EXAM-${new Date().getFullYear()}-${getNextInvoiceNumber('EXAM')};
+            
+            const formattedDate = new Date(examDate).toLocaleDateString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+            
+            // Get belt color class
+            const beltColorClass = belt-${appliedBelt.split(' ')[0].toLowerCase()};
+            
+            const receiptHTML = `
+                <div class="max-w-2xl mx-auto">
+                    <div class="text-center mb-8">
+                        <div class="flex justify-center mb-4">
+                            <div class="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center shadow-lg">
+                                <i class="fas fa-lion text-white text-3xl"></i>
+                            </div>
+                        </div>
+                        <h1 class="text-3xl font-bold">Lions Karate Club Pune</h1>
+                        <p class="text-sm text-gray-600 mt-1">Phone: 9049688172 | Pune, Maharashtra</p>
+                    </div>
+                    
+                    <div class="flex justify-between mb-8">
+                        <div>
+                            <p class="text-sm"><span class="font-semibold">Receipt No:</span> ${invoiceNumber}</p>
+                            <p class="text-sm"><span class="font-semibold">Date:</span> ${formattedDate}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-semibold">Student Name:</p>
+                            <p class="text-sm">${studentName}</p>
+                        </div>
+                    </div>
+                    
+                    <table class="w-full border-collapse mb-8">
+                        <thead>
+                            <tr class="bg-gray-800 text-white">
+                                <th class="py-3 px-4 text-left">Description</th>
+                                <th class="py-3 px-4 text-right">Amount (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="striped-row border-b border-gray-200">
+                                <td class="py-3 px-4 font-bold text-gray-900">${appliedBelt} Exam Fee</td>
+                                <td class="py-3 px-4 text-right font-bold text-gray-900">${examFee.toFixed(2)}</td>
+                            </tr>
+                            <tr class="bg-gray-800">
+                                <td class="py-3 px-4 font-bold text-white">Total Amount</td>
+                                <td class="py-3 px-4 text-right font-bold text-white">₹${examFee.toFixed(2)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="mt-6 p-4 bg-purple-50 rounded-lg">
+                        <p class="text-sm font-semibold text-purple-800">Exam Details:</p>
+                        <div class="flex items-center mt-2">
+                            <span class="px-3 py-1 rounded-full text-sm font-medium ${beltColorClass} mr-3">
+                                ${appliedBelt}
+                            </span>
+                            <p class="text-sm text-purple-700">Examination scheduled for ${formattedDate}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-12 pt-6 border-t border-gray-200 text-center text-sm text-gray-600">
+                        <p>Thank you for your payment!</p>
+                        <p class="mt-2">Generated by Lions Karate Club Bill Generator</p>
+                        <p class="mt-1 text-xs">${new Date().toLocaleString()}</p>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('receiptPreview').innerHTML = receiptHTML;
+            document.getElementById('receiptPreviewSection').classList.remove('hidden');
+            
+            // Save to recent receipts
+            saveRecentReceipt('exam', studentName, examFee, examDate);
+            
+            // Scroll to preview section
+            document.getElementById('receiptPreviewSection').scrollIntoView({ behavior: 'smooth' });
+            
+            showToast('Exam receipt generated successfully!');
+        });
+        
+        // Download PDF functionality - Fixed for mobile
+        document.getElementById('downloadPdf').addEventListener('click', function() {
+            const button = this;
+            const originalText = button.innerHTML;
+            
+            // Show loading state
+            button.disabled = true;
+            button.innerHTML = '<div class="spinner mr-2"></div> Downloading...';
+            
+            const element = document.getElementById('receiptPreview');
+            
+            // Create a promise to handle the PDF generation
+            const generatePDF = new Promise((resolve, reject) => {
+                try {
+                    html2canvas(element, {
+                        scale: 2,
+                        logging: false,
+                        useCORS: true,
+                        scrollX: 0,
+                        scrollY: 0,
+                        windowWidth: element.scrollWidth,
+                        windowHeight: element.scrollHeight
+                    }).then(canvas => {
+                        const imgData = canvas.toDataURL('image/png');
+                        const pdf = new jsPDF('p', 'mm', 'a4');
+                        const imgWidth = 210; // A4 width in mm
+                        const pageHeight = 295; // A4 height in mm
+                        const imgHeight = canvas.height * imgWidth / canvas.width;
+                        let heightLeft = imgHeight;
+                        let position = 0;
+                        
+                        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                        heightLeft -= pageHeight;
+                        
+                        while (heightLeft >= 0) {
+                            position = heightLeft - imgHeight;
+                            pdf.addPage();
+                            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                            heightLeft -= pageHeight;
+                        }
+                        
+                        // Generate filename based on receipt type
+                        let filename = 'receipt.pdf';
+                        if (document.getElementById('monthlyForm').classList.contains('hidden')) {
+                            filename = belt_exam_${document.getElementById('examStudentName').value.replace(/\s+/g, '_')}.pdf;
+                        } else {
+                            filename = monthly_fee_${document.getElementById('studentName').value.replace(/\s+/g, '_')}.pdf;
+                        }
+                        
+                        // For mobile devices, we need to use a different approach
+                        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                            // Create a blob and download it
+                            const pdfBlob = pdf.output('blob');
+                            const blobUrl = URL.createObjectURL(pdfBlob);
+                            
+                            // Create a temporary anchor element
+                            const a = document.createElement('a');
+                            a.href = blobUrl;
+                            a.download = filename;
+                            document.body.appendChild(a);
+                            a.click();
+                            
+                            // Clean up
+                            setTimeout(() => {
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(blobUrl);
+                            }, 100);
+                        } else {
+                            // For desktop, use the normal save method
+                            pdf.save(filename);
+                        }
+                        
+                        resolve();
+                    }).catch(err => {
+                        console.error('Error generating PDF:', err);
+                        reject('Error generating PDF');
+                    });
+                } catch (err) {
+                    console.error('Error in PDF generation:', err);
+                    reject('Error in PDF generation');
+                }
+            });
+            
+            generatePDF.then(() => {
+                showToast('PDF downloaded successfully!');
+            }).catch((error) => {
+                showToast(error || 'Failed to download PDF', 'error');
+            }).finally(() => {
+                // Restore button state
+                button.disabled = false;
+                button.innerHTML = originalText;
+            });
+        });
+        
+        // Print functionality
+        document.getElementById('printReceipt').addEventListener('click', function() {
+            const printWindow = window.open('', '', 'width=800,height=600');
+            printWindow.document.write('<html><head><title>Print Receipt</title>');
+            printWindow.document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">');
+            printWindow.document.write('<style>body { font-family: Arial; margin: 0; padding: 20px; }</style>');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(document.getElementById('receiptPreview').innerHTML);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 500);
+            
+            showToast('Print dialog opened');
+        });
+        
+        // Function to re-attach event listeners after print
+        function attachEventListeners() {
+            // Re-attach all necessary event listeners here
+            document.getElementById('monthlyTab').addEventListener('click', () => switchTab('monthly'));
+            document.getElementById('examTab').addEventListener('click', () => switchTab('exam'));
+            document.getElementById('mobileMonthlyTab').addEventListener('click', () => switchTab('monthly'));
+            document.getElementById('mobileExamTab').addEventListener('click', () => switchTab('exam'));
+            document.getElementById('generateMonthlyReceipt').addEventListener('click', generateMonthlyReceipt);
+            document.getElementById('generateExamReceipt').addEventListener('click', generateExamReceipt);
+            document.getElementById('downloadPdf').addEventListener('click', downloadPdf);
+            document.getElementById('printReceipt').addEventListener('click', printReceipt);
+            document.getElementById('mobileMenuToggle').addEventListener('click', toggleMobileMenu);
+        }
+    </script>
+</body>
+</html>
