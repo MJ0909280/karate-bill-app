@@ -1,1041 +1,953 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lions Karate Club - Bill Generator</title>
+    <title>Lions Karate Club – Bill Generator</title>
+
+    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- jsPDF & html2canvas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
+
         :root {
             --primary: #1a365d;
-            --primary-light: #2c5282;
-            --secondary: #4a5568;
-            --accent: #4299e1;
-            --background: #f7fafc;
-            --card-bg: #ffffff;
-            --text: #2d3748;
-            --text-light: #718096;
+            --secondary:#4a5568;
+            --accent:#4299e1;
+            --bg:#f7fafc;
+            --card:#ffffff;
+            --text:#2d3748;
         }
-        
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--background);
-            color: var(--text);
-            line-height: 1.6;
+            background:#f7fafc;
+            color:#2d3748;
         }
-        
-        .receipt-preview {
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
-            transition: all 0.2s ease;
-            background-color: var(--card-bg);
-            border-radius: 0.5rem;
+
+        .receipt-preview{
+            box-shadow:0 4px 8px rgba(0,0,0,.05);
+            border-radius:.5rem;
         }
-        
-        .striped-row:nth-child(even) {
-            background-color: rgba(66, 153, 225, 0.05);
+
+        .striped-row:nth-child(even){background:#f0f9ff;}
+
+        .toast{
+            position:fixed;
+            bottom:1.5rem;
+            right:1.5rem;
+            padding:.75rem 1.5rem;
+            border-radius:.375rem;
+            color:#fff;
+            font-weight:500;
+            box-shadow:0 4px 6px rgba(0,0,0,.1);
+            opacity:0;
+            transform:translateY(100px);
+            transition:all .2s ease;
+            z-index:1000;
         }
-        
-        .no-print {
-            display: none;
+        .toast.show{opacity:1;transform:translateY(0);}
+        .toast.success{background:#10b981;}
+        .toast.error{background:#ef4444;}
+
+        .spinner{
+            width:24px;height:24px;
+            border:3px solid rgba(255,255,255,.3);
+            border-top-color:#fff;
+            border-radius:50%;
+            animation:spin 1s linear infinite;
         }
-        
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            .receipt-preview, .receipt-preview * {
-                visibility: visible;
-            }
-            .receipt-preview {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                box-shadow: none;
-            }
+        @keyframes spin{to{transform:rotate(360deg);}}
+
+        .btn-hover-effect{transition:.3s;}
+        .btn-hover-effect:hover{transform:translateY(-2px);box-shadow:0 4px 6px rgba(0,0,0,.1);}
+
+        .input-focus-effect:focus{
+            box-shadow:0 0 0 3px rgba(59,130,246,.3);
         }
-        
-        /* Custom animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        .mobile-menu{
+            max-height:0;overflow:hidden;
+            transition:max-height .3s ease-out;
         }
-        
-        @keyframes slideIn {
-            from { transform: translateX(-20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        .mobile-menu.open{max-height:500px;}
+
+        .pdf-receipt{
+            font-family:'Inter',sans-serif;
+            font-size:12px;
+            max-width:210mm;
+            padding:10mm;
         }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        .animate-fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
-        }
-        
-        .animate-slide-in {
-            animation: slideIn 0.4s ease-out forwards;
-        }
-        
-        .animate-pulse {
-            animation: pulse 1.5s infinite;
-        }
-        
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-        
-        /* Karate belt colors */
-        .belt-white { background-color: #ffffff; color: var(--text); border: 1px solid #e2e8f0; }
-        .belt-yellow { background-color: #f6e05e; color: var(--text); }
-        .belt-orange { background-color: #ed8936; color: white; }
-        .belt-green { background-color: #48bb78; color: white; }
-        .belt-blue { background-color: #4299e1; color: white; }
-        .belt-purple { background-color: #9f7aea; color: white; }
-        .belt-brown { background-color: #b7793f; color: white; }
-        .belt-black { background-color: #1a202c; color: white; }
-        
-        /* Toast notification */
-        .toast {
-            position: fixed;
-            bottom: 1.5rem;
-            right: 1.5rem;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.375rem;
-            color: white;
-            font-weight: 500;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            z-index: 1000;
-            transform: translateY(100px);
-            opacity: 0;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .toast.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        
-        .toast.success {
-            background-color: #10b981;
-        }
-        
-        .toast.error {
-            background-color: #ef4444;
-        }
-        
-        /* Loading spinner */
-        .spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* Button hover effects */
-        .btn-hover-effect {
-            transition: all 0.3s ease;
-            transform: translateY(0);
-        }
-        
-        .btn-hover-effect:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        
-        /* Input focus effect */
-        .input-focus-effect:focus {
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-        }
-        
-        /* Mobile menu toggle */
-        .mobile-menu {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-        
-        .mobile-menu.open {
-            max-height: 500px;
-        }
+        .pdf-receipt table{font-size:11px;width:100%;}
+        .pdf-receipt th,.pdf-receipt td{padding:4px 6px;}
+        .pdf-receipt .logo{width:70px;height:70px;object-fit:contain;}
+        .pdf-receipt .qr-code{width:120px;height:120px;object-fit:contain;}
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Toast Notification -->
-    <div id="toast" class="toast hidden">
-        <div class="flex items-center">
-            <span id="toastMessage"></span>
+
+<!-- ==================== Toast ==================== -->
+<div id="toast" class="toast hidden"><span id="toastMessage"></span></div>
+
+<div class="container mx-auto px-4 py-8">
+
+    <!-- =============== Mobile Header =============== -->
+    <div class="lg:hidden mb-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <div class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center mr-3 shadow-lg">
+                    <i class="fas fa-lion text-white text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">Lions Karate Club</h1>
+                    <p class="text-xs text-gray-600">Pune, Maharashtra</p>
+                </div>
+            </div>
+            <button id="mobileMenuToggle"
+                    class="p-2 rounded-lg bg-gray-100 text-gray-700">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Mobile menu -->
+        <div id="mobileMenu" class="mobile-menu bg-white rounded-lg shadow-lg mt-3 p-4 hidden">
+            <button id="mobileMonthlyTab"
+                    class="w-full py-2 mb-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded flex items-center justify-between px-3">
+                <span><i class="fas fa-calendar-alt mr-2"></i>Monthly/Admission</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            <button id="mobileExamTab"
+                    class="w-full py-2 mb-2 bg-gray-100 text-gray-800 rounded flex items-center justify-between px-3">
+                <span><i class="fas fa-medal mr-2"></i>Belt Exam Fee</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            <button id="mobileOtherTab"
+                    class="w-full py-2 bg-gray-100 text-gray-800 rounded flex items-center justify-between px-3">
+                <span><i class="fas fa-file-invoice mr-2"></i>Other Invoice</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <h3 class="text-sm font-semibold mb-2 flex items-center">
+                    <i class="fas fa-info-circle mr-2 text-blue-600"></i>Club Info
+                </h3>
+                <p class="flex items-center text-xs text-gray-600 mb-1"><i class="fas fa-phone mr-2 text-blue-500"></i>Phone: 9049688172</p>
+                <p class="flex items-center text-xs text-gray-600"><i class="fas fa-map-marker-alt mr-2 text-blue-500"></i>Pune, Maharashtra</p>
+            </div>
         </div>
     </div>
-    
-    <div class="container mx-auto px-4 py-8">
-        <!-- Mobile Header -->
-        <div class="lg:hidden mb-6">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center">
-                    <div class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center shadow-lg mr-3">
-                        <i class="fas fa-lion text-white text-2xl"></i>
+
+    <!-- =============== Desktop Header =============== -->
+    <header class="hidden lg:block text-center mb-8">
+        <div class="flex justify-center mb-4">
+            <div class="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center shadow-lg animate-pulse">
+                <i class="fas fa-lion text-white text-3xl"></i>
+            </div>
+        </div>
+        <h1 class="text-4xl font-bold text-gray-800 mb-2 animate-slide-in">Lions Karate Club</h1>
+        <p class="text-xl text-gray-600">Pune, Maharashtra</p>
+        <p class="text-lg text-blue-600">Registration No: PU000121240</p>
+        <p class="text-lg text-blue-600 mt-2">Bill Generator System</p>
+    </header>
+
+    <div class="flex flex-col lg:flex-row gap-8">
+
+        <!-- =============== Sidebar (Desktop) =============== -->
+        <aside class="hidden lg:block w-1/4">
+            <nav class="bg-white rounded-xl shadow-md p-6 sticky top-4">
+                <h2 class="text-xl font-semibold mb-6 flex items-center text-gray-800">
+                    <i class="fas fa-receipt mr-2 text-blue-600"></i>Receipt Types
+                </h2>
+
+                <div class="space-y-3">
+                    <button id="monthlyTab"
+                            class="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded flex items-center justify-between">
+                        <span><i class="fas fa-calendar-alt mr-2"></i>Monthly/Admission</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+
+                    <button id="examTab"
+                            class="w-full py-3 px-4 bg-gray-100 text-gray-800 rounded flex items-center justify-between">
+                        <span><i class="fas fa-medal mr-2"></i>Belt Exam Fee</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+
+                    <button id="otherTab"
+                            class="w-full py-3 px-4 bg-gray-100 text-gray-800 rounded flex items-center justify-between">
+                        <span><i class="fas fa-file-invoice mr-2"></i>Other Invoice</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <div class="mt-8 pt-4 border-t border-gray-200">
+                    <h3 class="text-lg font-semibold mb-2 flex items-center">
+                        <i class="fas fa-info-circle mr-2 text-blue-600"></i>Club Info
+                    </h3>
+                    <p class="flex items-center text-sm text-gray-600 mb-1"><i class="fas fa-phone mr-2 text-blue-500"></i>Phone: 9049688172</p>
+                    <p class="flex items-center text-sm text-gray-600"><i class="fas fa-map-marker-alt mr-2 text-blue-500"></i>Pune, Maharashtra</p>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-gray-200">
+                    <h3 class="text-lg font-semibold mb-2 flex items-center">
+                        <i class="fas fa-history mr-2 text-blue-600"></i>Recent Receipts
+                    </h3>
+                    <div id="recentReceipts" class="text-sm text-gray-600">
+                        <p class="italic text-gray-500">No recent receipts yet</p>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- ================== Main Content ================== -->
+        <main class="flex-1">
+
+            <!-- =============== Monthly / Admission =============== -->
+            <section id="monthlyForm" class="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-200">
+                <div class="flex items-center mb-6">
+                    <div class="p-3 mr-4 bg-blue-100 text-blue-600 rounded">
+                        <i class="fas fa-calendar-alt text-xl"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold text-gray-800">Lions Karate Club</h1>
-                        <p class="text-xs text-gray-600">Pune, Maharashtra</p>
+                        <h2 class="text-2xl font-bold text-gray-800">Monthly/Admission Fee</h2>
+                        <p class="text-gray-600">Generate receipts for monthly fees and admissions</p>
                     </div>
                 </div>
-                <button id="mobileMenuToggle" class="p-2 rounded-lg bg-gray-100 text-gray-700">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
-            </div>
-            
-            <!-- Mobile Menu -->
-            <div id="mobileMenu" class="mobile-menu bg-white rounded-lg shadow-lg mt-3">
-                <div class="p-4">
-                    <div class="space-y-3 mb-4">
-                        <button id="mobileMonthlyTab" class="w-full py-2 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium transition duration-200 flex items-center justify-between">
-                            <span><i class="fas fa-calendar-alt mr-2"></i> Monthly/Admission</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </button>
-                        <button id="mobileExamTab" class="w-full py-2 px-4 rounded-lg bg-gray-100 text-gray-800 font-medium transition duration-200 flex items-center justify-between">
-                            <span><i class="fas fa-medal mr-2"></i> Belt Exam Fee</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="pt-4 border-t border-gray-200">
-                        <h3 class="text-sm font-semibold mb-3 text-gray-800 flex items-center">
-                            <i class="fas fa-info-circle mr-2 text-blue-600"></i> Club Info
-                        </h3>
-                        <div class="space-y-2 text-xs text-gray-600">
-                            <p class="flex items-center">
-                                <i class="fas fa-phone-alt mr-2 text-blue-500"></i> Phone: 9049688172
-                            </p>
-                            <p class="flex items-center">
-                                <i class="fas fa-map-marker-alt mr-2 text-blue-500"></i> Pune, Maharashtra
-                            </p>
-                            <p class="flex items-center">
-                                <i class="fas fa-clock mr-2 text-blue-500"></i> Mon-Sat: 6AM-9PM
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Desktop Header -->
-        <header class="mb-8 text-center hidden lg:block">
-            <div class="flex justify-center items-center mb-4">
-                <div class="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center shadow-lg animate-pulse">
-                    <i class="fas fa-lion text-white text-3xl"></i>
-                </div>
-            </div>
-            <h1 class="text-4xl font-bold text-gray-800 mb-2 animate-slide-in">Lions Karate Club</h1>
-            <p class="text-xl text-gray-600 font-medium">Pune, Maharashtra</p>
-            <p class="text-lg text-blue-600 font-medium">Registration No: PU000121240</p>
-            <p class="text-lg text-blue-600 mt-2 font-medium">Bill Generator System</p>
-        </header>
-        
-        <div class="flex flex-col lg:flex-row gap-8">
-            <!-- Navigation Sidebar -->
-            <div class="w-full lg:w-1/4 hidden lg:block">
-                <div class="bg-white rounded-xl shadow-md p-6 sticky top-4 transition-all duration-200 hover:shadow-lg border border-gray-200">
-                    <h2 class="text-xl font-semibold mb-6 text-gray-800 border-b pb-2 flex items-center">
-                        <i class="fas fa-receipt mr-2 text-blue-600"></i> Receipt Types
-                    </h2>
-                    <div class="space-y-3">
-                        <button id="monthlyTab" class="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium transition duration-200 hover:from-blue-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center justify-between btn-hover-effect">
-                            <span><i class="fas fa-calendar-alt mr-2"></i> Monthly/Admission</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </button>
-                        <button id="examTab" class="w-full py-3 px-4 rounded-lg bg-gray-100 text-gray-800 font-medium transition duration-200 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 flex items-center justify-between btn-hover-effect">
-                            <span><i class="fas fa-medal mr-2"></i> Belt Exam Fee</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="mt-8 pt-4 border-t border-gray-200">
-                        <h3 class="text-lg font-semibold mb-3 text-gray-800 flex items-center">
-                            <i class="fas fa-info-circle mr-2 text-blue-600"></i> Club Info
-                        </h3>
-                        <div class="space-y-2 text-sm text-gray-600">
-                            <p class="flex items-center">
-                                <i class="fas fa-phone-alt mr-2 text-blue-500"></i> Phone: 9049688172
-                            </p>
-                            <p class="flex items-center">
-                                <i class="fas fa-map-marker-alt mr-2 text-blue-500"></i> Pune, Maharashtra
-                            </p>
-                            <p class="flex items-center">
-                                <i class="fas fa-clock mr-2 text-blue-500"></i> Mon-Sat: 6AM-9PM
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-6 pt-4 border-t border-gray-200">
-                        <h3 class="text-lg font-semibold mb-3 text-gray-800 flex items-center">
-                            <i class="fas fa-calendar-check mr-2 text-blue-600"></i> Upcoming Exams
-                        </h3>
-                        <div id="upcomingExams" class="space-y-2 text-sm">
-                            <p class="text-gray-500 italic">No upcoming exams scheduled</p>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-6 pt-4 border-t border-gray-200">
-                        <h3 class="text-lg font-semibold mb-3 text-gray-800 flex items-center">
-                            <i class="fas fa-history mr-2 text-blue-600"></i> Recent Receipts
-                        </h3>
-                        <div id="recentReceipts" class="space-y-2 text-sm">
-                            <p class="text-gray-500 italic">No recent receipts yet</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Main Content Area -->
-            <div class="w-full lg:w-3/4">
-                <!-- Monthly/Admission Fee Form -->
-                <div id="monthlyForm" class="bg-white rounded-xl shadow-sm p-6 mb-8 animate-fade-in border border-gray-200">
-                    <div class="flex items-center mb-6">
-                        <div class="p-3 rounded-lg bg-blue-100 text-blue-600 mr-4">
-                            <i class="fas fa-calendar-alt text-xl"></i>
+
+                <form id="monthlyReceiptForm" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="studentName" class="block text-sm font-medium text-gray-700 mb-1 flex items-center"><i class="fas fa-user mr-2 text-blue-500"></i>Student Name</label>
+                            <input type="text" id="studentName" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 input-focus-effect" placeholder="Enter student name" required>
                         </div>
                         <div>
-                            <h2 class="text-2xl font-bold text-gray-800">Monthly/Admission Fee</h2>
-                            <p class="text-gray-600">Generate receipts for monthly fees and admissions</p>
+                            <label for="receiptDate" class="block text-sm font-medium text-gray-700 mb-1 flex items-center"><i class="fas fa-calendar-day mr-2 text-blue-500"></i>Date</label>
+                            <input type="date" id="receiptDate" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 input-focus-effect" required>
                         </div>
                     </div>
-                    
-                    <form id="monthlyReceiptForm" class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="studentName" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                                    <i class="fas fa-user mr-2 text-blue-500"></i> Student Name
-                                </label>
-                                <div class="relative">
-                                    <input type="text" id="studentName" name="studentName" class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 input-focus-effect text-gray-100 placeholder-gray-400" placeholder="Enter student name" required>
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <i class="fas fa-user text-gray-400"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <label for="receiptDate" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                                    <i class="fas fa-calendar-day mr-2 text-blue-500"></i> Date
-                                </label>
-                                <div class="relative">
-                                    <input type="date" id="receiptDate" name="receiptDate" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 input-focus-effect" required>
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <i class="fas fa-calendar text-gray-400"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div>
-                                <label for="monthlyFee" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                                    <i class="fas fa-rupee-sign mr-2 text-blue-500"></i> Monthly Fee (₹)
-                                </label>
-                                <div class="relative">
-                                    <input type="number" id="monthlyFee" name="monthlyFee" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 input-focus-effect" value="0" min="0" placeholder="0.00">
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <span class="text-gray-500">₹</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <label for="admissionFee" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                                    <i class="fas fa-sign-in-alt mr-2 text-blue-500"></i> Admission Fee (₹)
-                                </label>
-                                <div class="relative">
-                                    <input type="number" id="admissionFee" name="admissionFee" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 input-focus-effect" value="0" min="0" placeholder="0.00">
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <span class="text-gray-500">₹</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <label for="otherCharges" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                                    <i class="fas fa-plus-circle mr-2 text-blue-500"></i> Other Charges (₹)
-                                </label>
-                                <div class="relative">
-                                    <input type="number" id="otherCharges" name="otherCharges" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 input-focus-effect" value="0" min="0" placeholder="0.00">
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <span class="text-gray-500">₹</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
-                            <label for="notes" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                                <i class="fas fa-sticky-note mr-2 text-blue-500"></i> Notes
-                            </label>
-                            <textarea id="notes" name="notes" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 input-focus-effect" placeholder="Additional notes (optional)"></textarea>
-                        </div>
-                        
-                        <div class="flex justify-end space-x-4 pt-2">
-                            <button type="reset" class="px-6 py-3 bg-gray-700 text-gray-200 rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 transition duration-200 flex items-center btn-hover-effect">
-                                <i class="fas fa-redo mr-2"></i> Reset
-                            </button>
-                            <button type="button" id="generateMonthlyReceipt" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg hover:from-blue-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-200 flex items-center btn-hover-effect">
-                                <i class="fas fa-file-invoice-dollar mr-2"></i> Generate Receipt
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                
-                <!-- Belt Exam Fee Form -->
-                <div id="examForm" class="bg-white rounded-xl shadow-sm p-6 mb-8 hidden animate-fade-in border border-gray-200">
-                    <div class="flex items-center mb-6">
-                        <div class="p-3 rounded-lg bg-purple-100 text-purple-600 mr-4">
-                            <i class="fas fa-medal text-xl"></i>
+                            <label for="monthlyFee" class="block text-sm font-medium text-gray-700 mb-1 flex items-center"><i class="fas fa-rupee-sign mr-2 text-blue-500"></i>Monthly Fee (₹)</label>
+                            <input type="number" id="monthlyFee" min="0" step="0.01" value="0"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 input-focus-effect">
                         </div>
                         <div>
-                            <h2 class="text-2xl font-bold text-gray-800">Belt Exam Fee</h2>
-                            <p class="text-gray-600">Generate receipts for belt examination fees</p>
+                            <label for="admissionFee" class="block text-sm font-medium text-gray-700 mb-1 flex items-center"><i class="fas fa-sign-in-alt mr-2 text-blue-500"></i>Admission Fee (₹)</label>
+                            <input type="number" id="admissionFee" min="0" step="0.01" value="0"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 input-focus-effect">
+                        </div>
+                        <div>
+                            <label for="otherCharges" class="block text-sm font-medium text-gray-700 mb-1 flex items-center"><i class="fas fa-plus-circle mr-2 text-blue-500"></i>Other Charges (₹)</label>
+                            <input type="number" id="otherCharges" min="0" step="0.01" value="0"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 input-focus-effect">
                         </div>
                     </div>
-                    
-                    <form id="examReceiptForm" class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="examStudentName" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                                    <i class="fas fa-user mr-2 text-purple-500"></i> Student Name
-                                </label>
-                                <div class="relative">
-                                    <input type="text" id="examStudentName" name="examStudentName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200 input-focus-effect" placeholder="Enter student name" required>
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <i class="fas fa-user text-gray-400"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <label for="examDate" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                                    <i class="fas fa-calendar-day mr-2 text-purple-500"></i> Exam Date
-                                </label>
-                                <div class="relative">
-                                    <input type="date" id="examDate" name="examDate" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200 input-focus-effect" required>
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <i class="fas fa-calendar text-gray-400"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="appliedBelt" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                                    <i class="fas fa-belt mr-2 text-purple-500"></i> Applied Belt
-                                </label>
-                                <div class="relative">
-                                    <select id="appliedBelt" name="appliedBelt" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200 appearance-none input-focus-effect">
-                                        <option value="White Belt" class="belt-white">White Belt</option>
-                                        <option value="Yellow Belt" class="belt-yellow">Yellow Belt</option>
-                                        <option value="Orange Belt" class="belt-orange">Orange Belt</option>
-                                        <option value="Green Belt" class="belt-green">Green Belt</option>
-                                        <option value="Blue Belt" class="belt-blue">Blue Belt</option>
-                                        <option value="Purple Belt" class="belt-purple">Purple Belt</option>
-                                        <option value="Brown Belt" class="belt-brown">Brown Belt</option>
-                                        <option value="Black Belt" class="belt-black">Black Belt</option>
-                                    </select>
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <i class="fas fa-chevron-down text-gray-400"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <label for="examFee" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                                    <i class="fas fa-rupee-sign mr-2 text-purple-500"></i> Exam Fee (₹)
-                                </label>
-                                <div class="relative">
-                                    <input type="number" id="examFee" name="examFee" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200 input-focus-effect" required min="0" placeholder="0.00">
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <span class="text-gray-500">₹</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex justify-end space-x-4 pt-2">
-                            <button type="reset" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 transition duration-200 flex items-center btn-hover-effect">
-                                <i class="fas fa-redo mr-2"></i> Reset
-                            </button>
-                            <button type="button" id="generateExamReceipt" class="px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-lg hover:from-purple-700 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 transition duration-200 flex items-center btn-hover-effect">
-                                <i class="fas fa-file-invoice-dollar mr-2"></i> Generate Receipt
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                
-                <!-- Receipt Preview Section -->
-                <div id="receiptPreviewSection" class="bg-white rounded-xl shadow-sm p-6 hidden animate-fade-in border border-gray-200">
-                    <div class="flex justify-between items-center mb-6">
-                        <div class="flex items-center">
-                            <div class="p-3 rounded-lg bg-green-100 text-green-600 mr-4">
-                                <i class="fas fa-file-invoice text-xl"></i>
-                            </div>
-                            <div>
-                                <h2 class="text-2xl font-bold text-gray-800">Receipt Preview</h2>
-                                <p class="text-gray-600">Review before downloading</p>
-                            </div>
-                        </div>
-                        <div class="flex space-x-3">
-                            <button id="printReceipt" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 transition duration-200 flex items-center btn-hover-effect">
-                                <i class="fas fa-print mr-2"></i> Print
-                            </button>
-                            <button id="downloadPdf" class="px-4 py-2 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-lg hover:from-green-700 hover:to-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-200 flex items-center btn-hover-effect">
-                                <i class="fas fa-file-pdf mr-2"></i> Download PDF
-                            </button>
-                        </div>
+
+                    <div>
+                        <label for="notes" class="block text-sm font-medium text-gray-700 mb-1 flex items-center"><i class="fas fa-sticky-note mr-2 text-blue-500"></i>Notes</label>
+                        <textarea id="notes" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 input-focus-effect" placeholder="Additional notes (optional)"></textarea>
                     </div>
-                    
-                    <div id="receiptPreview" class="receipt-preview bg-white p-6 rounded-lg border border-gray-200 text-gray-800">
-                        <!-- Receipt content will be generated here -->
+
+                    <div class="flex justify-end space-x-4 pt-2">
+                        <button type="reset" class="px-6 py-2 bg-gray-700 text-gray-200 rounded hover:bg-gray-600 flex items-center btn-hover-effect"><i class="fas fa-redo mr-2"></i>Reset</button>
+                        <button type="button" id="generateMonthlyReceipt"
+                                class="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded hover:from-blue-700 hover:to-blue-600 flex items-center btn-hover-effect"><i class="fas fa-file-invoice-dollar mr-2"></i>Generate Receipt</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- =============== Belt Exam Fee =============== -->
+            <section id="examForm" class="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-200 hidden">
+                <div class="flex items-center mb-6">
+                    <div class="p-3 mr-4 bg-purple-100 text-purple-600 rounded">
+                        <i class="fas fa-medal text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Belt Exam Fee</h2>
+                        <p class="text-gray-600">Generate receipts for belt examination fees</p>
                     </div>
                 </div>
-            </div>
-        </div>
+
+                <form id="examReceiptForm" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="examStudentName" class="block text-sm font-medium text-gray-700 mb-1 flex items-center"><i class="fas fa-user mr-2 text-purple-500"></i>Student Name</label>
+                            <input type="text" id="examStudentName" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 input-focus-effect" placeholder="Enter student name" required>
+                        </div>
+                        <div>
+                            <label for="examDate" class="block text-sm font-medium text-gray-700 mb-1 flex items-center"><i class="fas fa-calendar-day mr-2 text-purple-500"></i>Exam Date</label>
+                            <input type="date" id="examDate" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 input-focus-effect" required>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="appliedBelt" class="block text-sm font-medium text-gray-700 mb-1 flex items-center"><i class="fas fa-belt mr-2 text-purple-500"></i>Applied Belt</label>
+                            <select id="appliedBelt" class="w-full px-4 py-2 border border-gray-300 rounded appearance-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 input-focus-effect">
+                                <option value="White Belt">White Belt</option>
+                                <option value="Yellow Belt">Yellow Belt</option>
+                                <option value="Orange Belt">Orange Belt</option>
+                                <option value="Green Belt">Green Belt</option>
+                                <option value="Blue Belt">Blue Belt</option>
+                                <option value="Purple Belt">Purple Belt</option>
+                                <option value="Brown Belt">Brown Belt</option>
+                                <option value="Black Belt">Black Belt</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="examFee" class="block text-sm font-medium text-gray-700 mb-1 flex items-center"><i class="fas fa-rupee-sign mr-2 text-purple-500"></i>Exam Fee (₹)</label>
+                            <input type="number" id="examFee" min="0" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 input-focus-effect" required>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end space-x-4 pt-2">
+                        <button type="reset" class="px-6 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 flex items-center btn-hover-effect"><i class="fas fa-redo mr-2"></i>Reset</button>
+                        <button type="button" id="generateExamReceipt"
+                                class="px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded hover:from-purple-700 hover:to-purple-600 flex items-center btn-hover-effect"><i class="fas fa-file-invoice-dollar mr-2"></i>Generate Receipt</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- =============== Other Invoice =============== -->
+            <section id="otherForm" class="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-200 hidden">
+                <div class="flex items-center mb-6">
+                    <div class="p-3 mr-4 bg-green-100 text-green-600 rounded">
+                        <i class="fas fa-file-invoice text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Other Invoice</h2>
+                        <p class="text-gray-600">Create custom invoices with multiple items</p>
+                    </div>
+                </div>
+
+                <form id="otherInvoiceForm" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="otherStudentName" class="block text-sm font-medium text-gray-700 mb-1 flex items-center"><i class="fas fa-user mr-2 text-green-500"></i>Student Name</label>
+                            <input type="text" id="otherStudentName" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 input-focus-effect" placeholder="Enter student name" required>
+                        </div>
+                        <div>
+                            <label for="otherDate" class="block text-sm font-medium text-gray-700 mb-1 flex items-center"><i class="fas fa-calendar-day mr-2 text-green-500"></i>Date</label>
+                            <input type="date" id="otherDate" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 input-focus-effect" required>
+                        </div>
+                    </div>
+
+                    <!-- Items -->
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-medium flex items-center text-gray-700"><i class="fas fa-list mr-2 text-green-500"></i>Items</h3>
+                            <button type="button" id="addItem" class="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 flex items-center"><i class="fas fa-plus mr-1"></i>Add Item</button>
+                        </div>
+
+                        <div id="itemsContainer" class="space-y-4">
+                            <!-- One item row by default -->
+                            <div class="item-row grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                                <div class="md:col-span-5">
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                                    <input type="text" class="item-description w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 input-focus-effect" placeholder="Item description" required>
+                                </div>
+                                <div class="md:col-span-3">
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Qty</label>
+                                    <input type="number" class="item-quantity w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 input-focus-effect" value="1" min="1" required>
+                                </div>
+                                <div class="md:col-span-3">
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Price (₹)</label>
+                                    <input type="number" class="item-price w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 input-focus-effect" value="0" min="0" step="0.01" required>
+                                </div>
+                                <div class="md:col-span-1 flex items-center">
+                                    <button type="button" class="remove-item w-full h-10 flex items-center justify-center text-red-500 hover:text-red-700 rounded hover:bg-red-50 transition"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="otherNotes" class="block text-sm font-medium text-gray-700 mb-1 flex items-center"><i class="fas fa-sticky-note mr-2 text-green-500"></i>Notes</label>
+                        <textarea id="otherNotes" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 input-focus-effect" placeholder="Additional notes (optional)"></textarea>
+                    </div>
+
+                    <div class="flex justify-end space-x-4 pt-2">
+                        <button type="reset" class="px-6 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 flex items-center btn-hover-effect"><i class="fas fa-redo mr-2"></i>Reset</button>
+                        <button type="button" id="generateOtherReceipt"
+                                class="px-6 py-2 bg-gradient-to-r from-green-600 to-green-500 text-white rounded hover:from-green-700 hover:to-green-600 flex items-center btn-hover-effect"><i class="fas fa-file-invoice-dollar mr-2"></i>Generate Invoice</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- =============== Receipt Preview =============== -->
+            <section id="receiptPreviewSection" class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center">
+                        <div class="p-3 mr-4 bg-green-100 text-green-600 rounded">
+                            <i class="fas fa-file-invoice text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Receipt Preview</h2>
+                            <p class="text-gray-600">Review before downloading</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button id="printReceipt"
+                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 flex items-center btn-hover-effect"><i class="fas fa-print mr-2"></i>Print</button>
+                        <button id="downloadPdf"
+                                class="px-4 py-2 bg-gradient-to-r from-green-600 to-green-500 text-white rounded hover:from-green-700 hover:to-green-600 flex items-center btn-hover-effect"><i class="fas fa-file-pdf mr-2"></i>Download PDF</button>
+                    </div>
+                </div>
+
+                <div id="receiptPreview" class="receipt-preview bg-white p-6 rounded border border-gray-200 text-gray-800">
+                    <!-- Receipt HTML will be injected here -->
+                </div>
+            </section>
+
+        </main>
     </div>
+</div>
 
-if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-    // Create a blob with correct MIME type
-    const pdfBlob = pdf.output('blob');
-    const blob = new Blob([pdfBlob], { type: 'application/pdf' });
-    const blobUrl = URL.createObjectURL(blob);
+<script>
+    // ***** Helper functions *****
+    const { jsPDF } = window.jspdf;
 
-    // Create a temporary anchor element
-    const a = document.createElement('a');
-    a.href = blobUrl;
-    a.download = filename.endsWith('.pdf') ? filename : filename + '.pdf'; // Ensure .pdf extension
-    document.body.appendChild(a);
-    a.click();
+    // Toast notifications ----------------------------------------------------
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        toastMessage.textContent = message;
+        toast.className = `toast ${type} show`;
+        setTimeout(() => { toast.className = 'toast hidden'; }, 3000);
+    }
 
-    setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(blobUrl);
-    }, 100);
-} else {
-    pdf.save(filename.endsWith('.pdf') ? filename : filename + '.pdf');
-}
-
-The rest of the file remains unchanged.]
-    <script>
-        // Initialize jsPDF
-        const { jsPDF } = window.jspdf;
-        
-        // Show toast notification
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
-            
-            toastMessage.textContent = message;
-            toast.className = `toast ${type} show`;
-            
-            setTimeout(() => {
-                toast.className = 'toast hidden';
-            }, 3000);
+    // Mobile menu ------------------------------------------------------------
+    function initMobileMenu() {
+        const toggle = document.getElementById('mobileMenuToggle');
+        const menu = document.getElementById('mobileMenu');
+        if (toggle && menu) {
+            toggle.addEventListener('click', () => {
+                menu.classList.toggle('open');
+                menu.classList.toggle('hidden');
+            });
         }
-        
-        // Mobile menu toggle
-        document.getElementById('mobileMenuToggle').addEventListener('click', function() {
-            const menu = document.getElementById('mobileMenu');
-            menu.classList.toggle('open');
-        });
-        
-        // Tab switching functionality
-        function switchTab(tab) {
-            if (tab === 'monthly') {
-                document.getElementById('monthlyForm').classList.remove('hidden');
-                document.getElementById('examForm').classList.add('hidden');
-                document.getElementById('receiptPreviewSection').classList.add('hidden');
-                
-                document.getElementById('monthlyTab').classList.remove('bg-gray-100', 'text-gray-800');
-                document.getElementById('monthlyTab').classList.add('bg-gradient-to-r', 'from-blue-600', 'to-blue-500', 'text-white');
-                
-                document.getElementById('examTab').classList.remove('bg-gradient-to-r', 'from-purple-600', 'to-purple-500', 'text-white');
-                document.getElementById('examTab').classList.add('bg-gray-100', 'text-gray-800');
-                
-                // For mobile
-                document.getElementById('mobileMonthlyTab').classList.remove('bg-gray-100', 'text-gray-800');
-                document.getElementById('mobileMonthlyTab').classList.add('bg-gradient-to-r', 'from-blue-600', 'to-blue-500', 'text-white');
-                
-                document.getElementById('mobileExamTab').classList.remove('bg-gradient-to-r', 'from-purple-600', 'to-purple-500', 'text-white');
-                document.getElementById('mobileExamTab').classList.add('bg-gray-100', 'text-gray-800');
-                
-                // Close mobile menu
-                document.getElementById('mobileMenu').classList.remove('open');
-            } else {
-                document.getElementById('monthlyForm').classList.add('hidden');
-                document.getElementById('examForm').classList.remove('hidden');
-                document.getElementById('receiptPreviewSection').classList.add('hidden');
-                
-                document.getElementById('examTab').classList.remove('bg-gray-100', 'text-gray-800');
-                document.getElementById('examTab').classList.add('bg-gradient-to-r', 'from-purple-600', 'to-purple-500', 'text-white');
-                
-                document.getElementById('monthlyTab').classList.remove('bg-gradient-to-r', 'from-blue-600', 'to-blue-500', 'text-white');
-                document.getElementById('monthlyTab').classList.add('bg-gray-100', 'text-gray-800');
-                
-                // For mobile
-                document.getElementById('mobileExamTab').classList.remove('bg-gray-100', 'text-gray-800');
-                document.getElementById('mobileExamTab').classList.add('bg-gradient-to-r', 'from-purple-600', 'to-purple-500', 'text-white');
-                
-                document.getElementById('mobileMonthlyTab').classList.remove('bg-gradient-to-r', 'from-blue-600', 'to-blue-500', 'text-white');
-                document.getElementById('mobileMonthlyTab').classList.add('bg-gray-100', 'text-gray-800');
-                
-                // Close mobile menu
-                document.getElementById('mobileMenu').classList.remove('open');
-            }
+    }
+
+    // Tab switching -----------------------------------------------------------
+    function switchTab(tab) {
+        // Hide all sections
+        document.getElementById('monthlyForm').classList.add('hidden');
+        document.getElementById('examForm').classList.add('hidden');
+        document.getElementById('otherForm').classList.add('hidden');
+        document.getElementById('receiptPreviewSection').classList.add('hidden');
+
+        // Reset tab styles
+        const resetTab = (el) => {
+            if (!el) return;
+            el.classList.remove('bg-gradient-to-r', 'from-blue-600', 'to-blue-500', 'from-purple-600', 'to-purple-500', 'from-green-600', 'to-green-500', 'text-white');
+            el.classList.add('bg-gray-100', 'text-gray-800');
+        };
+        resetTab(document.getElementById('monthlyTab'));
+        resetTab(document.getElementById('examTab'));
+        resetTab(document.getElementById('otherTab'));
+        resetTab(document.getElementById('mobileMonthlyTab'));
+        resetTab(document.getElementById('mobileExamTab'));
+        resetTab(document.getElementById('mobileOtherTab'));
+
+        // Activate the chosen tab + show section
+        const activate = (tabEl, gradientFrom, gradientTo) => {
+            if (!tabEl) return;
+            tabEl.classList.remove('bg-gray-100', 'text-gray-800');
+            tabEl.classList.add('bg-gradient-to-r', gradientFrom, gradientTo, 'text-white');
+        };
+
+        if (tab === 'monthly') {
+            document.getElementById('monthlyForm').classList.remove('hidden');
+            activate(document.getElementById('monthlyTab'), 'from-blue-600', 'to-blue-500');
+            activate(document.getElementById('mobileMonthlyTab'), 'from-blue-600', 'to-blue-500');
+        } else if (tab === 'exam') {
+            document.getElementById('examForm').classList.remove('hidden');
+            activate(document.getElementById('examTab'), 'from-purple-600', 'to-purple-500');
+            activate(document.getElementById('mobileExamTab'), 'from-purple-600', 'to-purple-500');
+        } else if (tab === 'other') {
+            document.getElementById('otherForm').classList.remove('hidden');
+            activate(document.getElementById('otherTab'), 'from-green-600', 'to-green-500');
+            activate(document.getElementById('mobileOtherTab'), 'from-green-600', 'to-green-500');
         }
-        
+
+        // Close mobile menu if open
+        const mobileMenu = document.getElementById('mobileMenu');
+        if (mobileMenu && mobileMenu.classList.contains('open')) {
+            mobileMenu.classList.remove('open');
+            mobileMenu.classList.add('hidden');
+        }
+    }
+
+    function initTabSwitching() {
+        // Desktop tabs
         document.getElementById('monthlyTab').addEventListener('click', () => switchTab('monthly'));
         document.getElementById('examTab').addEventListener('click', () => switchTab('exam'));
+        document.getElementById('otherTab').addEventListener('click', () => switchTab('other'));
+
+        // Mobile tabs
         document.getElementById('mobileMonthlyTab').addEventListener('click', () => switchTab('monthly'));
         document.getElementById('mobileExamTab').addEventListener('click', () => switchTab('exam'));
-        
-        // Set today's date as default
-        document.addEventListener('DOMContentLoaded', function() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('receiptDate').value = today;
-            document.getElementById('examDate').value = today;
-            
-            // Load recent receipts from localStorage
-            loadRecentReceipts();
+        document.getElementById('mobileOtherTab').addEventListener('click', () => switchTab('other'));
+    }
+
+    // Default dates -----------------------------------------------------------
+    function setDefaultDates() {
+        const today = new Date().toISOString().split('T')[0];
+        ['receiptDate', 'examDate', 'otherDate'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = today;
         });
-        
-        // Invoice number tracking using localStorage
-        function getNextInvoiceNumber(type) {
-            const now = new Date();
-            const year = now.getFullYear();
-            const key = `${type}_${year}`;
-            
-            let lastNumber = localStorage.getItem(key);
-            if (!lastNumber) {
-                lastNumber = 0;
-            } else {
-                lastNumber = parseInt(lastNumber);
-            }
-            
-            const nextNumber = lastNumber + 1;
-            localStorage.setItem(key, nextNumber.toString());
-            
-            return nextNumber.toString().padStart(3, '0');
+    }
+
+    // Invoice number generator (yearly incremental) -------------------------
+    function getNextInvoiceNumber(prefix) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const key = `${prefix}_${year}`;
+        let last = parseInt(localStorage.getItem(key) || '0', 10);
+        last += 1;
+        localStorage.setItem(key, String(last));
+        return `${prefix}-${year}-${String(last).padStart(3, '0')}`;
+    }
+
+    // Recent receipts ---------------------------------------------------------
+    function saveRecentReceipt(type, name, amount, date) {
+        const list = JSON.parse(localStorage.getItem('recentReceipts') || '[]');
+
+        // Keep only last 5
+        if (list.length >= 5) list.pop();
+
+        list.unshift({ type, name, amount, date });
+        localStorage.setItem('recentReceipts', JSON.stringify(list));
+        renderRecentReceipts();
+    }
+
+    function renderRecentReceipts() {
+        const container = document.getElementById('recentReceipts');
+        if (!container) return;
+
+        const list = JSON.parse(localStorage.getItem('recentReceipts') || '[]');
+        if (list.length === 0) {
+            container.innerHTML = `<p class="italic text-gray-500">No recent receipts yet</p>`;
+            return;
         }
-        
-        // Save receipt to recent receipts
-        function saveRecentReceipt(type, studentName, amount, date) {
-            const receipts = JSON.parse(localStorage.getItem('recentReceipts') || '[]');
-            
-            // Limit to 5 recent receipts
-            if (receipts.length >= 5) {
-                receipts.pop();
-            }
-            
-            receipts.unshift({
-                type: type,
-                studentName: studentName,
-                amount: amount,
-                date: date,
-                timestamp: new Date().getTime()
+
+        let html = '';
+        list.forEach(r => {
+            const date = new Date(r.date).toLocaleDateString('en-IN', {
+                day: '2-digit', month: 'short', year: 'numeric'
             });
-            
-            localStorage.setItem('recentReceipts', JSON.stringify(receipts));
-            loadRecentReceipts();
-        }
-        
-        // Load recent receipts
-        function loadRecentReceipts() {
-            const receipts = JSON.parse(localStorage.getItem('recentReceipts') || '[]');
-            const container = document.getElementById('recentReceipts');
-            
-            if (receipts.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 italic">No recent receipts yet</p>';
-                return;
-            }
-            
-            let html = '';
-            receipts.forEach(receipt => {
-                const formattedDate = new Date(receipt.date).toLocaleDateString('en-IN', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric'
-                });
-                
-                const typeClass = receipt.type === 'monthly' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800';
-                const typeIcon = receipt.type === 'monthly' ? 'fa-calendar-alt' : 'fa-medal';
-                
-                html += `
-                    <div class="p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition duration-200">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-medium">${receipt.studentName}</p>
-                                <p class="text-xs text-gray-500">${formattedDate}</p>
-                            </div>
-                            <span class="px-2 py-1 rounded-full text-xs font-medium ${typeClass}">
-                                <i class="fas ${typeIcon} mr-1"></i> ₹${receipt.amount.toFixed(2)}
-                            </span>
-                        </div>
+            let badgeClass = 'bg-blue-100 text-blue-800';
+            let icon = 'fa-calendar-alt';
+
+            if (r.type === 'exam') { badgeClass='bg-purple-100 text-purple-800'; icon='fa-medal'; }
+            if (r.type === 'other') { badgeClass='bg-green-100 text-green-800'; icon='fa-file-invoice'; }
+
+            html += `
+                <div class="flex items-center justify-between py-2 border-b border-gray-200">
+                    <div>
+                        <p class="font-medium text-gray-800">${r.name}</p>
+                        <p class="text-xs text-gray-500">${date}</p>
                     </div>
-                `;
-            });
-            
-            container.innerHTML = html;
-        }
-        
-        // Generate Monthly Receipt
-        document.getElementById('generateMonthlyReceipt').addEventListener('click', function() {
-            const studentName = document.getElementById('studentName').value;
-            const receiptDate = document.getElementById('receiptDate').value;
-            const monthlyFee = parseFloat(document.getElementById('monthlyFee').value) || 0;
-            const admissionFee = parseFloat(document.getElementById('admissionFee').value) || 0;
-            const otherCharges = parseFloat(document.getElementById('otherCharges').value) || 0;
-            const notes = document.getElementById('notes').value;
-            
-            if (!studentName || !receiptDate) {
-                showToast('Please fill in all required fields', 'error');
-                return;
-            }
-            
-            const totalAmount = monthlyFee + admissionFee + otherCharges;
-            const invoiceNumber = `INV-${new Date().getFullYear()}-${getNextInvoiceNumber('INV')}`;
-            
-            const formattedDate = new Date(receiptDate).toLocaleDateString('en-IN', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric'
-            });
-            
-            const receiptHTML = `
-                <div class="max-w-2xl mx-auto">
-                    <div class="text-center mb-8">
-                        <p class="text-sm font-medium text-gray-600 mb-2">Registration No: PU000121240</p>
-                        <div class="flex justify-center mb-4">
-                            <div class="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center shadow-lg">
-                                <i class="fas fa-lion text-white text-3xl"></i>
-                            </div>
-                        </div>
-                        <h1 class="text-3xl font-bold">Lions Karate Club Pune</h1>
-                        <p class="text-sm text-gray-600 mt-1">Phone: 9049688172 | Pune, Maharashtra</p>
-                    </div>
-                    
-                    <div class="flex justify-between mb-8">
-                        <div>
-                            <p class="text-sm"><span class="font-semibold">Invoice No:</span> ${invoiceNumber}</p>
-                            <p class="text-sm"><span class="font-semibold">Date:</span> ${formattedDate}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-sm font-semibold">Student Name:</p>
-                            <p class="text-sm">${studentName}</p>
-                        </div>
-                    </div>
-                    
-                    <table class="w-full border-collapse mb-8">
-                        <thead>
-                            <tr class="bg-gray-700 text-gray-100">
-                                <th class="py-3 px-4 text-left">Description</th>
-                                <th class="py-3 px-4 text-right">Amount (₹)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${monthlyFee > 0 ? `
-                            <tr class="striped-row border-b border-gray-700">
-                                <td class="py-3 px-4 font-bold text-gray-900">Monthly Fee</td>
-                                <td class="py-3 px-4 text-right font-bold text-gray-900">${monthlyFee.toFixed(2)}</td>
-                            </tr>
-                            ` : ''}
-                            ${admissionFee > 0 ? `
-                            <tr class="striped-row border-b border-gray-200">
-                                <td class="py-3 px-4 font-bold text-gray-900">Admission Fee</td>
-                                <td class="py-3 px-4 text-right font-bold text-gray-900">${admissionFee.toFixed(2)}</td>
-                            </tr>
-                            ` : ''}
-                            ${otherCharges > 0 ? `
-                            <tr class="striped-row border-b border-gray-200">
-                                <td class="py-3 px-4 font-bold text-gray-900">Other Charges</td>
-                                <td class="py-3 px-4 text-right font-bold text-gray-900">${otherCharges.toFixed(2)}</td>
-                            </tr>
-                            ` : ''}
-                            <tr class="bg-gray-800">
-                                <td class="py-3 px-4 font-bold text-white">Total Amount</td>
-                                <td class="py-3 px-4 text-right font-bold text-white">₹${totalAmount.toFixed(2)}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    
-                    ${notes ? `
-                    <div class="mt-6 p-4 bg-blue-50 rounded-lg">
-                        <p class="text-sm font-semibold text-blue-800">Notes:</p>
-                        <p class="text-sm text-blue-700">${notes}</p>
-                    </div>
-                    ` : ''}
-                    
-                    <div class="mt-12 pt-6 border-t border-gray-200 text-center text-sm text-gray-600">
-                        <p>Thank you for your payment!</p>
-                        <p class="mt-2">Generated by Lions Karate Club Bill Generator</p>
-                        <p class="mt-1 text-xs">${new Date().toLocaleString()}</p>
+                    <div class="flex items-center text-sm ${badgeClass} px-2 py-1 rounded">
+                        <i class="fas ${icon} mr-1"></i>₹${r.amount.toFixed(2)}
                     </div>
                 </div>
             `;
-            
-            document.getElementById('receiptPreview').innerHTML = receiptHTML;
+        });
+        container.innerHTML = html;
+    }
+
+    // Add / Remove item (Other Invoice) -------------------------------------
+    function initAddItem() {
+        const addBtn = document.getElementById('addItem');
+        addBtn?.addEventListener('click', () => {
+            const container = document.getElementById('itemsContainer');
+            if (!container) return;
+
+            const newRow = document.createElement('div');
+            newRow.className = 'item-row grid grid-cols-1 md:grid-cols-12 gap-4 items-end';
+            newRow.innerHTML = `
+                <div class="md:col-span-5">
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                    <input type="text" class="item-description w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 input-focus-effect" placeholder="Item description" required>
+                </div>
+                <div class="md:col-span-3">
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Qty</label>
+                    <input type="number" class="item-quantity w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 input-focus-effect" value="1" min="1" required>
+                </div>
+                <div class="md:col-span-3">
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Price (₹)</label>
+                    <input type="number" class="item-price w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 input-focus-effect" value="0" min="0" step="0.01" required>
+                </div>
+                <div class="md:col-span-1 flex items-center">
+                    <button type="button" class="remove-item w-full h-10 flex items-center justify-center text-red-500 hover:text-red-700 rounded hover:bg-red-50 transition"><i class="fas fa-trash"></i></button>
+                </div>
+            `;
+            container.appendChild(newRow);
+        });
+    }
+
+    // Delegated remove item handler (so it works for dynamic rows)
+    function initRemoveItem() {
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.remove-item')) {
+                const row = e.target.closest('.item-row');
+                const container = document.getElementById('itemsContainer');
+                if (container.children.length > 1) {
+                    container.removeChild(row);
+                } else {
+                    showToast('At least one item is required', 'error');
+                }
+            }
+        });
+    }
+
+    // Generate Monthly Receipt -------------------------------------------------
+    function initGenerateMonthlyReceipt() {
+        const btn = document.getElementById('generateMonthlyReceipt');
+        btn?.addEventListener('click', () => {
+            const name = document.getElementById('studentName').value.trim();
+            const date = document.getElementById('receiptDate').value;
+            const monthly = parseFloat(document.getElementById('monthlyFee').value) || 0;
+            const admission = parseFloat(document.getElementById('admissionFee').value) || 0;
+            const other = parseFloat(document.getElementById('otherCharges').value) || 0;
+            const notes = document.getElementById('notes').value.trim();
+
+            if (!name || !date) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            const total = monthly + admission + other;
+            const invNo = getNextInvoiceNumber('INV');
+            const formattedDate = new Date(date).toLocaleDateString('en-IN', {
+                day: '2-digit', month: 'short', year: 'numeric'
+            });
+
+            // Build table rows only for non‑zero items
+            let rows = '';
+            if (monthly > 0) rows += `<tr class="striped-row"><td class="font-medium py-2 px-3">Monthly Fee</td><td class="text-right py-2 px-3">₹${monthly.toFixed(2)}</td></tr>`;
+            if (admission > 0) rows += `<tr class="striped-row"><td class="font-medium py-2 px-3">Admission Fee</td><td class="text-right py-2 px-3">₹${admission.toFixed(2)}</td></tr>`;
+            if (other > 0) rows += `<tr class="striped-row"><td class="font-medium py-2 px-3">Other Charges</td><td class="text-right py-2 px-3">₹${other.toFixed(2)}</td></tr>`;
+
+            const receiptHTML = `
+                <div class="pdf-receipt">
+                    <div class="text-center mb-6">
+                        <img src="https://i.postimg.cc/FsCCfVFX/LIONS-l-OGO.png" alt="Club Logo" class="logo mb-2">
+                        <h1 class="text-xl font-bold">Lions Karate Club – Pune</h1>
+                        <p class="text-xs text-gray-600">Phone: 9049688172 | Pune, Maharashtra</p>
+                        <p class="text-xs text-gray-600">Registration No: PU000121240</p>
+                    </div>
+                    <div class="flex justify-between text-xs mb-4">
+                        <div>
+                            <p><strong>Invoice No:</strong> ${invNo}<br><strong>Date:</strong> ${formattedDate}</p>
+                        </div>
+                        <div class="text-right">
+                            <p><strong>Student Name:</strong><br>${name}</p>
+                        </div>
+                    </div>
+                    <table class="w-full border-collapse">
+                        <thead class="bg-gray-100">
+                            <tr><th class="text-left py-2">Description</th><th class="text-right py-2">Amount (₹)</th></tr>
+                        </thead>
+                        <tbody>
+                            ${rows}
+                            <tr class="bg-gray-800 text-white font-bold">
+                                <td class="py-2 px-3 text-right">Total</td>
+                                <td class="py-2 px-3 text-right">₹${total.toFixed(2)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    ${notes ? `<div class="mt-4 p-2 bg-gray-50 rounded"><strong>Notes:</strong> ${notes}</div>` : ''}
+                    <div class="mt-6 pt-4 border-t border-gray-200 text-center">
+                        <img src="https://i.postimg.cc/ht9xFK5Z/Whats-App-Image-2025-08-08-at-14-45-04-69c782b8.jpg" alt="QR Code" class="qr-code mx-auto mb-2">
+                        <p class="text-xs text-gray-600">Scan QR code to pay</p>
+                        <p class="mt-2 text-xs text-gray-600">Thank you for your payment!</p>
+                        <p class="mt-2 text-xs text-gray-600">Generated by Lions Karate Club Bill Generator</p>
+                        <p class="mt-1 text-xs text-gray-500">${new Date().toLocaleString()}</p>
+                    </div>
+                </div>
+            `;
+
+            const preview = document.getElementById('receiptPreview');
+            preview.innerHTML = receiptHTML;
             document.getElementById('receiptPreviewSection').classList.remove('hidden');
-            
-            // Save to recent receipts
-            saveRecentReceipt('monthly', studentName, totalAmount, receiptDate);
-            
-            // Scroll to preview section
-            document.getElementById('receiptPreviewSection').scrollIntoView({ behavior: 'smooth' });
-            
+
+            saveRecentReceipt('monthly', name, total, date);
+            preview.scrollIntoView({ behavior: 'smooth' });
             showToast('Receipt generated successfully!');
         });
-        
-        // Generate Exam Receipt
-        document.getElementById('generateExamReceipt').addEventListener('click', function() {
-            const studentName = document.getElementById('examStudentName').value;
-            const examDate = document.getElementById('examDate').value;
-            const appliedBelt = document.getElementById('appliedBelt').value;
-            const examFee = parseFloat(document.getElementById('examFee').value) || 0;
-            
-            if (!studentName || !examDate || !examFee) {
+    }
+
+    // Generate Exam Receipt ----------------------------------------------------
+    function initGenerateExamReceipt() {
+        const btn = document.getElementById('generateExamReceipt');
+        btn?.addEventListener('click', () => {
+            const name = document.getElementById('examStudentName').value.trim();
+            const date = document.getElementById('examDate').value;
+            const belt = document.getElementById('appliedBelt').value;
+            const fee = parseFloat(document.getElementById('examFee').value) || 0;
+
+            if (!name || !date || fee <= 0) {
                 showToast('Please fill in all required fields', 'error');
                 return;
             }
-            
-            const invoiceNumber = `EXAM-${new Date().getFullYear()}-${getNextInvoiceNumber('EXAM')}`;
-            
-            const formattedDate = new Date(examDate).toLocaleDateString('en-IN', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric'
+
+            const invNo = getNextInvoiceNumber('EXAM');
+            const formattedDate = new Date(date).toLocaleDateString('en-IN', {
+                day: '2-digit', month: 'short', year: 'numeric'
             });
-            
-            // Get belt color class
-            const beltColorClass = `belt-${appliedBelt.split(' ')[0].toLowerCase()}`;
-            
+
+            const beltClass = `belt-${belt.split(' ')[0].toLowerCase()}`;
+
             const receiptHTML = `
-                <div class="max-w-2xl mx-auto">
-                    <div class="text-center mb-8">
-                        <div class="flex justify-center mb-4">
-                            <div class="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center shadow-lg">
-                                <i class="fas fa-lion text-white text-3xl"></i>
-                            </div>
-                        </div>
-                        <h1 class="text-3xl font-bold">Lions Karate Club Pune</h1>
-                        <p class="text-sm text-gray-600 mt-1">Phone: 9049688172 | Pune, Maharashtra</p>
+                <div class="pdf-receipt">
+                    <div class="text-center mb-6">
+                        <img src="https://i.postimg.cc/FsCCfVFX/LIONS-l-OGO.png" alt="Club Logo" class="logo mb-2">
+                        <h1 class="text-xl font-bold">Lions Karate Club – Pune</h1>
+                        <p class="text-xs text-gray-600">Phone: 9049688172 | Pune, Maharashtra</p>
+                        <p class="text-xs text-gray-600">Registration No: PU000121240</p>
                     </div>
-                    
-                    <div class="flex justify-between mb-8">
+                    <div class="flex justify-between text-xs mb-4">
                         <div>
-                            <p class="text-sm"><span class="font-semibold">Receipt No:</span> ${invoiceNumber}</p>
-                            <p class="text-sm"><span class="font-semibold">Date:</span> ${formattedDate}</p>
+                            <p><strong>Receipt No:</strong> ${invNo}<br><strong>Date:</strong> ${formattedDate}</p>
                         </div>
                         <div class="text-right">
-                            <p class="text-sm font-semibold">Student Name:</p>
-                            <p class="text-sm">${studentName}</p>
+                            <p><strong>Student Name:</strong><br>${name}</p>
                         </div>
                     </div>
-                    
-                    <table class="w-full border-collapse mb-8">
-                        <thead>
-                            <tr class="bg-gray-800 text-white">
-                                <th class="py-3 px-4 text-left">Description</th>
-                                <th class="py-3 px-4 text-right">Amount (₹)</th>
-                            </tr>
+                    <table class="w-full border-collapse">
+                        <thead class="bg-gray-100">
+                            <tr><th class="text-left py-2">Description</th><th class="text-right py-2">Amount (₹)</th></tr>
                         </thead>
                         <tbody>
-                            <tr class="striped-row border-b border-gray-200">
-                                <td class="py-3 px-4 font-bold text-gray-900">${appliedBelt} Exam Fee</td>
-                                <td class="py-3 px-4 text-right font-bold text-gray-900">${examFee.toFixed(2)}</td>
-                            </tr>
-                            <tr class="bg-gray-800">
-                                <td class="py-3 px-4 font-bold text-white">Total Amount</td>
-                                <td class="py-3 px-4 text-right font-bold text-white">₹${examFee.toFixed(2)}</td>
+                            <tr class="striped-row"><td class="py-2 px-3">${belt} Exam Fee</td><td class="text-right py-2 px-3">₹${fee.toFixed(2)}</td></tr>
+                            <tr class="bg-gray-800 text-white font-bold">
+                                <td class="py-2 px-3 text-right">Total</td>
+                                <td class="py-2 px-3 text-right">₹${fee.toFixed(2)}</td>
                             </tr>
                         </tbody>
                     </table>
-                    
-                    <div class="mt-6 p-4 bg-purple-50 rounded-lg">
-                        <p class="text-sm font-semibold text-purple-800">Exam Details:</p>
-                        <div class="flex items-center mt-2">
-                            <span class="px-3 py-1 rounded-full text-sm font-medium ${beltColorClass} mr-3">
-                                ${appliedBelt}
-                            </span>
-                            <p class="text-sm text-purple-700">Examination scheduled for ${formattedDate}</p>
-                        </div>
+                    <div class="mt-4 p-2 bg-purple-50 rounded text-sm">
+                        <p><strong>Exam Details:</strong></p>
+                        <p class="flex items-center"><span class="${beltClass} mr-2 px-2 py-1 rounded text-xs font-medium">${belt}</span>Exam on ${formattedDate}</p>
                     </div>
-                    
-                    <div class="mt-12 pt-6 border-t border-gray-200 text-center text-sm text-gray-600">
-                        <p>Thank you for your payment!</p>
-                        <p class="mt-2">Generated by Lions Karate Club Bill Generator</p>
-                        <p class="mt-1 text-xs">${new Date().toLocaleString()}</p>
+                    <div class="mt-6 pt-4 border-t border-gray-200 text-center">
+                        <img src="https://i.postimg.cc/ht9xFK5Z/Whats-App-Image-2025-08-08-at-14-45-04-69c782b8.jpg" alt="QR Code" class="qr-code mx-auto mb-2">
+                        <p class="text-xs text-gray-600">Scan QR code to pay</p>
+                        <p class="mt-2 text-xs text-gray-600">Thank you for your payment!</p>
+                        <p class="mt-2 text-xs text-gray-600">Generated by Lions Karate Club Bill Generator</p>
+                        <p class="mt-1 text-xs text-gray-500">${new Date().toLocaleString()}</p>
                     </div>
                 </div>
             `;
-            
-            document.getElementById('receiptPreview').innerHTML = receiptHTML;
+
+            const preview = document.getElementById('receiptPreview');
+            preview.innerHTML = receiptHTML;
             document.getElementById('receiptPreviewSection').classList.remove('hidden');
-            
-            // Save to recent receipts
-            saveRecentReceipt('exam', studentName, examFee, examDate);
-            
-            // Scroll to preview section
-            document.getElementById('receiptPreviewSection').scrollIntoView({ behavior: 'smooth' });
-            
+
+            saveRecentReceipt('exam', name, fee, date);
+            preview.scrollIntoView({ behavior: 'smooth' });
             showToast('Exam receipt generated successfully!');
         });
-        
-        // Download PDF functionality - Fixed for mobile
-        document.getElementById('downloadPdf').addEventListener('click', function() {
-            const button = this;
-            const originalText = button.innerHTML;
-            
-            // Show loading state
-            button.disabled = true;
-            button.innerHTML = '<div class="spinner mr-2"></div> Downloading...';
-            
-            const element = document.getElementById('receiptPreview');
-            
-            // Create a promise to handle the PDF generation
-            const generatePDF = new Promise((resolve, reject) => {
-                try {
-                    html2canvas(element, {
-                        scale: 2,
-                        logging: false,
-                        useCORS: true,
-                        scrollX: 0,
-                        scrollY: 0,
-                        windowWidth: element.scrollWidth,
-                        windowHeight: element.scrollHeight
-                    }).then(canvas => {
-                        const imgData = canvas.toDataURL('image/png');
-                        const pdf = new jsPDF('p', 'mm', 'a4');
-                        const imgWidth = 210; // A4 width in mm
-                        const pageHeight = 295; // A4 height in mm
-                        const imgHeight = canvas.height * imgWidth / canvas.width;
-                        let heightLeft = imgHeight;
-                        let position = 0;
-                        
-                        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                        heightLeft -= pageHeight;
-                        
-                        while (heightLeft >= 0) {
-                            position = heightLeft - imgHeight;
-                            pdf.addPage();
-                            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                            heightLeft -= pageHeight;
-                        }
-                        
-                        // Generate filename based on receipt type
-                        let filename = 'receipt.pdf';
-                        if (document.getElementById('monthlyForm').classList.contains('hidden')) {
-                            filename = `belt_exam_${document.getElementById('examStudentName').value.replace(/\s+/g, '_')}.pdf`;
-                        } else {
-                            filename = `monthly_fee_${document.getElementById('studentName').value.replace(/\s+/g, '_')}.pdf`;
-                        }
-                        
-                        // For mobile devices, we need to use a different approach
-                        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                            // Create a blob and download it
-                            const pdfBlob = pdf.output('blob');
-                            const blobUrl = URL.createObjectURL(pdfBlob);
-                            
-                            // Create a temporary anchor element
-                            const a = document.createElement('a');
-                            a.href = blobUrl;
-                            a.download = filename;
-                            document.body.appendChild(a);
-                            a.click();
-                            
-                            // Clean up
-                            setTimeout(() => {
-                                document.body.removeChild(a);
-                                URL.revokeObjectURL(blobUrl);
-                            }, 100);
-                        } else {
-                            // For desktop, use the normal save method
-                            pdf.save(filename);
-                        }
-                        
-                        resolve();
-                    }).catch(err => {
-                        console.error('Error generating PDF:', err);
-                        reject('Error generating PDF');
-                    });
-                } catch (err) {
-                    console.error('Error in PDF generation:', err);
-                    reject('Error in PDF generation');
+    }
+
+    // Generate Other Invoice ---------------------------------------------------
+    function initGenerateOtherReceipt() {
+        const btn = document.getElementById('generateOtherReceipt');
+        btn?.addEventListener('click', () => {
+            const name = document.getElementById('otherStudentName').value.trim();
+            const date = document.getElementById('otherDate').value;
+            const notes = document.getElementById('otherNotes').value.trim();
+
+            if (!name || !date) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            // Gather items
+            const rows = document.querySelectorAll('.item-row');
+            let itemsHTML = '';
+            let total = 0;
+            let hasValidItem = false;
+
+            rows.forEach(row => {
+                const desc = row.querySelector('.item-description').value.trim();
+                const qty = parseInt(row.querySelector('.item-quantity').value, 10) || 0;
+                const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                const amount = qty * price;
+
+                if (desc && qty > 0 && price > 0) {
+                    hasValidItem = true;
+                    total += amount;
+                    itemsHTML += `
+                        <tr class="striped-row">
+                            <td class="py-2 px-3">${desc}</td>
+                            <td class="py-2 px-3 text-center">${qty}</td>
+                            <td class="py-2 px-3 text-right">₹${price.toFixed(2)}</td>
+                            <td class="py-2 px-3 text-right">₹${amount.toFixed(2)}</td>
+                        </tr>`;
                 }
             });
-            
-            generatePDF.then(() => {
+
+            if (!hasValidItem) {
+                showToast('Please add at least one valid item', 'error');
+                return;
+            }
+
+            const invNo = getNextInvoiceNumber('OTHER');
+            const formattedDate = new Date(date).toLocaleDateString('en-IN', {
+                day: '2-digit', month: 'short', year: 'numeric'
+            });
+
+            const receiptHTML = `
+                <div class="pdf-receipt">
+                    <div class="text-center mb-6">
+                        <img src="https://i.postimg.cc/FsCCfVFX/LIONS-l-OGO.png" alt="Club Logo" class="logo mb-2">
+                        <h1 class="text-xl font-bold">Lions Karate Club – Pune</h1>
+                        <p class="text-xs text-gray-600">Phone: 9049688172 | Pune, Maharashtra</p>
+                        <p class="text-xs text-gray-600">Registration No: PU000121240</p>
+                    </div>
+                    <div class="flex justify-between text-xs mb-4">
+                        <div>
+                            <p><strong>Invoice No:</strong> ${invNo}<br><strong>Date:</strong> ${formattedDate}</p>
+                        </div>
+                        <div class="text-right">
+                            <p><strong>Student Name:</strong><br>${name}</p>
+                        </div>
+                    </div>
+                    <table class="w-full border-collapse">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="py-2 text-left">Description</th>
+                                <th class="py-2 text-center">Qty</th>
+                                <th class="py-2 text-right">Price (₹)</th>
+                                <th class="py-2 text-right">Amount (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${itemsHTML}
+                            <tr class="bg-gray-800 text-white font-bold">
+                                <td colspan="3" class="py-2 px-3 text-right">Total</td>
+                                <td class="py-2 px-3 text-right">₹${total.toFixed(2)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    ${notes ? `<div class="mt-4 p-2 bg-gray-50 rounded"><strong>Notes:</strong> ${notes}</div>` : ''}
+                    <div class="mt-6 pt-4 border-t border-gray-200 text-center">
+                        <img src="https://i.postimg.cc/ht9xFK5Z/Whats-App-Image-2025-08-08-at-14-45-04-69c782b8.jpg" alt="QR Code" class="qr-code mx-auto mb-2">
+                        <p class="text-xs text-gray-600">Scan QR code to pay</p>
+                        <p class="mt-2 text-xs text-gray-600">Thank you for your payment!</p>
+                        <p class="mt-2 text-xs text-gray-600">Generated by Lions Karate Club Bill Generator</p>
+                        <p class="mt-1 text-xs text-gray-500">${new Date().toLocaleString()}</p>
+                    </div>
+                </div>
+            `;
+
+            const preview = document.getElementById('receiptPreview');
+            preview.innerHTML = receiptHTML;
+            document.getElementById('receiptPreviewSection').classList.remove('hidden');
+
+            saveRecentReceipt('other', name, total, date);
+            preview.scrollIntoView({ behavior: 'smooth' });
+            showToast('Invoice generated successfully!');
+        });
+    }
+
+    // PDF download ------------------------------------------------------------
+    function initDownloadPdf() {
+        const btn = document.getElementById('downloadPdf');
+        btn?.addEventListener('click', () => {
+            const receipt = document.getElementById('receiptPreview');
+            if (!receipt) {
+                showToast('No receipt to download', 'error');
+                return;
+            }
+
+            // Show loading state
+            const originalHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner mr-2"></div>Downloading...';
+
+            html2canvas(receipt, {scale:2,useCORS:true}).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p','mm','a4');
+
+                const imgProps = pdf.getImageProperties(imgData);
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+                pdf.addImage(imgData,'PNG',0,0,pdfWidth,pdfHeight);
+                const filename = receipt.innerHTML.includes('Exam') ?
+                    `belt_exam_${Date.now()}.pdf` :
+                    `invoice_${Date.now()}.pdf`;
+
+                pdf.save(filename);
                 showToast('PDF downloaded successfully!');
-            }).catch((error) => {
-                showToast(error || 'Failed to download PDF', 'error');
+            }).catch(err => {
+                console.error(err);
+                showToast('Failed to generate PDF', 'error');
             }).finally(() => {
-                // Restore button state
-                button.disabled = false;
-                button.innerHTML = originalText;
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
             });
         });
-        
-        // Print functionality
-        document.getElementById('printReceipt').addEventListener('click', function() {
-            const printWindow = window.open('', '', 'width=800,height=600');
-            printWindow.document.write('<html><head><title>Print Receipt</title>');
-            printWindow.document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">');
-            printWindow.document.write('<style>body { font-family: Arial; margin: 0; padding: 20px; }</style>');
-            printWindow.document.write('</head><body>');
-            printWindow.document.write(document.getElementById('receiptPreview').innerHTML);
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            
-            setTimeout(() => {
-                printWindow.print();
-                printWindow.close();
-            }, 500);
-            
-            showToast('Print dialog opened');
+    }
+
+    // Print receipt ------------------------------------------------------------
+    function initPrintReceipt() {
+        const btn = document.getElementById('printReceipt');
+        btn?.addEventListener('click', () => {
+            const receipt = document.getElementById('receiptPreview');
+            if (!receipt) {
+                showToast('No receipt to print', 'error');
+                return;
+            }
+
+            const win = window.open('', '_blank', 'width=800,height=600');
+            win.document.write(`
+                <html>
+                <head>
+                    <title>Print Receipt</title>
+                    <link rel="stylesheet"
+                          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+                    <style>
+                        body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:20px;}
+                        .pdf-receipt{font-size:12px;}
+                    </style>
+                </head>
+                <body>${receipt.innerHTML}</body>
+                </html>
+            `);
+            win.document.close();
+            setTimeout(() => win.print(), 300);
         });
-        
-        // Function to re-attach event listeners after print
-        function attachEventListeners() {
-            // Re-attach all necessary event listeners here
-            document.getElementById('monthlyTab').addEventListener('click', () => switchTab('monthly'));
-            document.getElementById('examTab').addEventListener('click', () => switchTab('exam'));
-            document.getElementById('mobileMonthlyTab').addEventListener('click', () => switchTab('monthly'));
-            document.getElementById('mobileExamTab').addEventListener('click', () => switchTab('exam'));
-            document.getElementById('generateMonthlyReceipt').addEventListener('click', generateMonthlyReceipt);
-            document.getElementById('generateExamReceipt').addEventListener('click', generateExamReceipt);
-            document.getElementById('downloadPdf').addEventListener('click', downloadPdf);
-            document.getElementById('printReceipt').addEventListener('click', printReceipt);
-            document.getElementById('mobileMenuToggle').addEventListener('click', toggleMobileMenu);
-        }
-    </script>
+    }
+
+    // Initialize everything ----------------------------------------------------
+    document.addEventListener('DOMContentLoaded', () => {
+        initMobileMenu();
+        initTabSwitching();
+        setDefaultDates();
+        initAddItem();
+        initRemoveItem();
+        initGenerateMonthlyReceipt();
+        initGenerateExamReceipt();
+        initGenerateOtherReceipt();
+        initDownloadPdf();
+        initPrintReceipt();
+        renderRecentReceipts();
+    });
+</script>
 </body>
 </html>
